@@ -9,14 +9,14 @@ contract StringMapper {
     mapping(uint => string) listum;
     mapping(uint => bytes32) deleted;
 
-    bytes32[3][] alldata;
+//    bytes32[3][] alldata;
 
     function StringMapper() payable { 
       itemcount = 0;
       itemdeleted = 0;
       itemmax = 128;
       pagemax = 32;
-      alldata = new bytes32[3][](itemmax);
+//      alldata = new bytes32[3][](itemmax);
     }
 
     function stringToBytes32(string memory source) constant returns (bytes32 result) {
@@ -37,15 +37,17 @@ contract StringMapper {
         map[hash] = value;
         listum[itemcount] = key;
 
-        alldata[itemcount-1][1] = stringToBytes32(key);
-        alldata[itemcount-1][0] = hash;
-        alldata[itemcount-1][1] = stringToBytes32(value);
+//        alldata[itemcount-1][1] = stringToBytes32(key);
+//        alldata[itemcount-1][0] = hash;
+//        alldata[itemcount-1][1] = stringToBytes32(value);
 
         return true;
     }
 
     function dumpData(uint start, uint end) constant returns(bytes32[3][] results) { 
-      if (start < 0 || end < 0) throw;
+      if (start < 0 || end < 0 || itemcount == 0) throw;
+
+      if (end+1 > itemcount) end = itemcount - 1;
 
       uint al = end - start + 1;
 
@@ -54,9 +56,9 @@ contract StringMapper {
       results = new bytes32[3][](al);
 
       for (uint i = start; i <= end; i++) {
-        results[i-start][0] = alldata[i][0];
-        results[i-start][1] = alldata[i][1];
-        results[i-start][2] = alldata[i][2];
+        results[i-start][0] = stringToBytes32(listum[i+1]);
+        results[i-start][1] = sha3( listum[i+1] );
+        results[i-start][2] = stringToBytes32(map[ results[i-start][1] ]);
       }
 
       return results; 
@@ -112,15 +114,15 @@ contract StringMapper {
           delete_count++;
           delete listum[id];
           delete deleted[id];
-          delete alldata[i];
+//          delete alldata[i];
           continue; 
         }
 
         listum[id - delete_count] = listum[id];
-        alldata[i - delete_count] = alldata[i];
+//        alldata[i - delete_count] = alldata[i];
         if (delete_count != 0) {
           delete listum[id];
-          delete alldata[i];
+//          delete alldata[i];
         }
         newtotal++;
       }
