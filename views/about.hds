@@ -1,0 +1,10 @@
+  <div class="jumbotron">
+    <div class="container">
+      <h1 align="center">About this DApp ...</h1>
+    </div>
+  </div>
+
+  <div>
+    <h3 align="center">Contract: {{contract_address}} </h3>
+    <h3 align="center">Author: Jason Lin</h3>
+  </div>

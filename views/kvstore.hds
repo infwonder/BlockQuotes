@@ -1,0 +1,49 @@
+  <div class="jumbotron">
+    <div class="container">
+      <h1 align="center">Key-Value Store:</h1>
+    </div>
+  </div>
+
+<div>
+
+<div class="table-responsive">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Key</th>
+      <th>Hash</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+{{#kvlist}}
+    <tr>
+      <td>{{id}}</td>
+      <td>{{key}}</td>
+      <td>{{hash}}</td>
+      <td>{{value}}</td>
+    </tr>
+{{/kvlist}}
+  </tbody>
+</table>
+</div>
+
+<div class="container">
+<nav aria-label="Page navigation example">
+  <ul class="pager">
+    {{#if firstpage}}
+    <li class="previous disabled"><a class="page-link" tabindex="-1" href="#">Prev</a></li>
+    {{else}}
+    <li class="previous"><a class="page-link" style="color: black" href="/kvstore?page={{dec page}}">Prev</a></li>
+    {{/if}}
+
+    {{#if lastpage}}
+    <li class="next disabled"><a class="page-link" tabindex="-1" href="#">Next</a></li>
+    {{else}}
+    <li class="next"><a class="page-link" style="color: black" href="/kvstore?page={{inc page}}">Next</a></li>
+    {{/if}}
+  </ul>
+</nav>
+</div>
+

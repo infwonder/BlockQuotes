@@ -1,0 +1,12 @@
+  <div class="jumbotron">
+    <div class="container">
+      <h1 align="center">Welcome to My </h1><h1 align="center">Ethereum Key-Value Store DApp!</h1>
+      <form role="form" action="/querykey?form="querykey" method="POST">
+      <div align="center">
+      <br><br><label for="keyquery">Please enter key:</label>
+        <input type="text" id="keyquery" name="keystr" size=72 required placeholder="e.g., my precious key"></input>
+        <button type="submit">Send</button>
+      </div>
+      </form>
+    </div>
+  </div>

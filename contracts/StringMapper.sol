@@ -1,7 +1,7 @@
 pragma solidity ^0.4.6;
 contract StringMapper {
 
-    uint itemcount;
+    uint public itemcount;
     uint itemdeleted;
     uint itemmax;
     uint pagemax;
@@ -96,10 +96,11 @@ contract StringMapper {
       return results;
     }
 
-    function delKeyValue(uint id) payable returns(bool) {
-      if(bytes(listum[id]).length == 0) throw;
+    function delKeyValue(uint id, bytes32 hash) payable returns(bool) {
+      if(bytes(listum[id]).length == 0 || sha3 (listum[id]) != hash) throw;
       itemdeleted++;
-      deleted[id] = sha3( listum[id] );
+      deleted[id] = hash;
+      if (packTable() == false) throw;
     }
 
     function packTable() payable returns(bool) {

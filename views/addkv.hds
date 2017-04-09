@@ -1,0 +1,17 @@
+  <div class="jumbotron">
+    <div class="container">
+      <h1 align="center">Adding New Key-Value Pair:</h1>
+    </div>
+  </div>
+  <div class="container">
+    <form role="form" action="/addkey?form="newkv" method="POST">
+      <div class="row" align=center>
+        <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
+        <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 required placeholder="e.g., my precious new key"></input></div>
+        <div class="col-md-12" align="left"><label for="thisval">The new value:</label>
+        <input type="text" id="thisval" name="valstr" required size=144 maxlength=32 placeholder="e.g., my new value"></input></div>
+        <div class="col-md-12"><button type="submit">Send</button></div>
+      </div>
+
+    </form>
+  </div>

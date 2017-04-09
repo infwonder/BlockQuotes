@@ -1,0 +1,4 @@
+<h1> Something is wrong !!</h1>
+<div>
+{{error}}
+</div>
