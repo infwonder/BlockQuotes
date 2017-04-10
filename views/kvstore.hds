@@ -1,6 +1,6 @@
   <div class="jumbotron">
     <div class="container">
-      <h1 align="center">Key-Value Store:</h1>
+      <h1 align="center">Words on the street says ...</h1>
     <nav aria-label="Page navigation example">
       <ul class="pager">
         {{#if firstpage}}
@@ -24,18 +24,18 @@
   <thead>
     <tr>
       <th>#</th>
-      <th>Key</th>
-      <th>Hash</th>
-      <th>Value</th>
+      <th>Title</th>
+      <th>Date</th>
+      <th>Author</th>
     </tr>
   </thead>
   <tbody>
 {{#kvlist}}
     <tr>
       <td>{{id}}</td>
-      <td>{{key}}</td>
-      <td style="font-family:monospace">{{hash}}</td>
-      <td>{{value}}</td>
+      <td><a href="/post/{{hash}}">{{title}}</a></td>
+      <td>{{date}}</td>
+      <td style="font-family:monospace">{{author}}</td>
     </tr>
 {{/kvlist}}
   </tbody>

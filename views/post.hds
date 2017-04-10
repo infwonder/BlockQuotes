@@ -1,0 +1,11 @@
+  <div class="jumbotron">
+    <div class="container">
+      <br>
+      <h1 align="center">{{value}}</h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <h3 align="center">By {{author}}</h3>
+    <h4 align="center">On {{date}}</h4>
+  </div>

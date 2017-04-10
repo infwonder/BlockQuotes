@@ -3,20 +3,18 @@ contract StringMapper {
 
     uint public itemcount;
     uint itemdeleted;
-    uint itemmax;
     uint pagemax;
+
     mapping(bytes32 => string) map;
+    mapping(bytes32 => uint) dmap;
+    mapping(bytes32 => address) pmap;
     mapping(uint => string) listum;
     mapping(uint => bytes32) deleted;
-
-//    bytes32[3][] alldata;
 
     function StringMapper() payable { 
       itemcount = 0;
       itemdeleted = 0;
-      itemmax = 128;
       pagemax = 32;
-//      alldata = new bytes32[3][](itemmax);
     }
 
     function stringToBytes32(string memory source) constant returns (bytes32 result) {
@@ -31,7 +29,7 @@ contract StringMapper {
         }
     }
 
-    function title(string memory source) constant returns (bytes32[4] result) {
+    function title(string memory source) constant returns (bytes32[7] result) {
         uint srclen = bytes(source).length;
         uint parts;
 
@@ -43,6 +41,8 @@ contract StringMapper {
           if (restpt != 0) parts++;
         }
 
+        if (parts > 4) parts = 4;
+
         for (uint i = 1; i <= parts; i++) {
           uint N = i * 32;
           result[i-1] = stringToBytes32s(source, N);
@@ -52,23 +52,20 @@ contract StringMapper {
     function addKeyValue(string key, string value) payable returns(bool){
         if (bytes(key).length == 0 || bytes(value).length == 0) throw;
         itemcount++;
-        if (itemcount > itemmax) throw;
 
         bytes32 hash = sha3(key);
         if(bytes(map[hash]).length != 0) throw;
 
         // update data
         map[hash] = value;
+        dmap[hash] = now;
+        pmap[hash] = msg.sender;
         listum[itemcount] = key;
-
-//        alldata[itemcount-1][1] = stringToBytes32(key);
-//        alldata[itemcount-1][0] = hash;
-//        alldata[itemcount-1][1] = stringToBytes32(value);
 
         return true;
     }
 
-    function dumpData(uint start, uint end) constant returns(bytes32[3][] results) { 
+    function dumpData(uint start, uint end) constant returns(bytes32[7][] results) { 
       if (start < 0 || end < 0 || itemcount == 0) throw;
 
       if (end+1 > itemcount) end = itemcount - 1;
@@ -77,31 +74,29 @@ contract StringMapper {
 
       if (al > pagemax || al <= 0) throw;
 
-      results = new bytes32[3][](al);
+      results = new bytes32[7][](al);
 
       for (uint i = start; i <= end; i++) {
-        results[i-start][0] = stringToBytes32(listum[i+1]);
-        results[i-start][1] = sha3( listum[i+1] );
-        results[i-start][2] = stringToBytes32(map[ results[i-start][1] ]);
+        results[i-start] = title(listum[i+1]);
+        bytes32 hash = sha3( listum[i+1] );
+        results[i-start][4] = hash;
+        results[i-start][5] = bytes32(dmap[hash]);
+        results[i-start][6] = bytes32(pmap[hash]);
       }
 
       return results; 
     }
 
-    function getHash(string key) constant returns(bytes32[2][] hash) {
-       hash = new bytes32[2][](1);
-       hash[0][0] = stringToBytes32('bobogaga');
-       hash[0][1] = sha3(key);
-    }
-
     function doSha3( string testingString ) constant returns (bytes32) { return sha3( testingString ); }
 
-    function getValue(string key) constant returns(string){
-        bytes32 hash = sha3(key);
-        return map[hash];
+    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author){
+        date = dmap[hash];
+        author = pmap[hash];
+        value = map[hash];
     }
 
-    function getValueFromHash(bytes32 hash) constant returns(string){
+    function getValue(string key) constant returns(string){
+        bytes32 hash = sha3( key );
         return map[hash];
     }
 
@@ -136,18 +131,17 @@ contract StringMapper {
 
         if (uint(deleted[id]) != 0) { 
           delete map[deleted[id]];
+          delete dmap[deleted[id]];
+          delete pmap[deleted[id]];
           delete_count++;
           delete listum[id];
           delete deleted[id];
-//          delete alldata[i];
           continue; 
         }
 
         listum[id - delete_count] = listum[id];
-//        alldata[i - delete_count] = alldata[i];
         if (delete_count != 0) {
           delete listum[id];
-//          delete alldata[i];
         }
         newtotal++;
       }

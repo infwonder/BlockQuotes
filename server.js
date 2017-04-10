@@ -85,7 +85,12 @@ StrMapCtr.deployed().then( (StrMapIns) =>
         var a = []; var id = 0;
         items.map( (p) => 
         {
-          a.push({'id': id + start, 'key': web3.toUtf8(p[0]), 'hash': web3.toHex(web3.toBigNumber(p[1])), 'value': web3.toUtf8(p[2])});
+          var d = new Date(0);
+          d.setUTCSeconds(web3.toDecimal(web3.toBigNumber(p[5])));
+
+          var ts = ''; [p[0], p[1], p[2], p[3]].map( (i) => { ts += web3.toUtf8(i); });
+
+          a.push({'id': id + start, 'title': ts, 'hash': web3.toHex(web3.toBigNumber(p[4])), 'date': d, 'author': web3.toHex(web3.toBigNumber(p[6]))});
           id++;
         });
     
@@ -94,6 +99,18 @@ StrMapCtr.deployed().then( (StrMapIns) =>
       {
         response.render('kvstore', {kvlist: array, start: start, end: end, page: thispage, firstpage: firstpage, lastpage: lastpage});
       });
+    });
+  });
+
+  app.get('/post/:phash', function(request, response) 
+  {
+    var key = request.params.phash;
+
+    StrMapIns.getValueByHash(key).then((results) => 
+    {
+      var d = new Date(0);
+      d.setUTCSeconds(web3.toDecimal(web3.toBigNumber(results[0])));
+      response.render('post', {'date': d, 'author': results[2], 'value': results[1]});
     });
   });
 
@@ -123,7 +140,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     var thiskey = request.body.keystr;
     var thisval = request.body.valstr;
 
-    StrMapIns.addKeyValue(thiskey, thisval, {from: web3.eth.accounts[0]}).then((result) => 
+    StrMapIns.addKeyValue(thiskey, thisval, {from: web3.eth.accounts[1], gas: 400000}).then((result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';
