@@ -25,6 +25,30 @@ contract StringMapper {
         }
     }
 
+    function stringToBytes32s(string memory source, uint N) constant returns (bytes32 result) {
+        assembly {
+           result := mload(add(source, N))
+        }
+    }
+
+    function title(string memory source) constant returns (bytes32[4] result) {
+        uint srclen = bytes(source).length;
+        uint parts;
+
+        if (srclen <= 32) { 
+          parts = 1;
+        } else {
+          uint restpt = srclen % 32;
+          parts = (srclen - restpt) / 32;
+          if (restpt != 0) parts++;
+        }
+
+        for (uint i = 1; i <= parts; i++) {
+          uint N = i * 32;
+          result[i-1] = stringToBytes32s(source, N);
+        }
+    }
+
     function addKeyValue(string key, string value) payable returns(bool){
         if (bytes(key).length == 0 || bytes(value).length == 0) throw;
         itemcount++;

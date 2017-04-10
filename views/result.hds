@@ -18,7 +18,7 @@
 {{#kvlist}}
     <tr>
       <td>{{key}}</td>
-      <td>{{hash}}</td>
+      <td style="font-family:monospace;">{{hash}}</td>
       <td>{{value}}</td>
     </tr>
 {{/kvlist}}

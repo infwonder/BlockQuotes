@@ -132,7 +132,8 @@ StrMapCtr.deployed().then( (StrMapIns) =>
       
       var array = [{key: thiskey, hash: web3.sha3(thiskey), value: thisval}]; // for speed sake, but probably not right...
       response.render('result', {kvlist: array});
-    });
+    })
+    .catch((err) => { catchedError(response, err); });
     
   });
 
