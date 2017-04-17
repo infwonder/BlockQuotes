@@ -5,10 +5,21 @@ contract StringMapper {
     uint itemdeleted;
     uint pagemax;
 
-    mapping(bytes32 => string) map;
-    mapping(bytes32 => uint) dmap;
-    mapping(bytes32 => address) pmap;
-    mapping(uint => string) listum;
+    struct ipfsdata {
+      uint postid;
+      string title;
+      string quote;
+      uint datemark;
+      address poster;
+      uint piccount;
+      uint extlinks;
+      bytes32 mainaddr; 
+      mapping(uint => bytes32) ipfspics; 
+      mapping(uint => bytes32) ipfslink;
+    }
+
+    mapping(uint => string) listum; // for looping list
+    mapping(bytes32 => ipfsdata) map;
     mapping(uint => bytes32) deleted;
 
     struct associate {
@@ -60,15 +71,14 @@ contract StringMapper {
 
     function addKeyValue(string key, string value) payable returns(bool){
         if (bytes(key).length == 0 || bytes(value).length == 0) throw;
-        itemcount++;
 
         bytes32 hash = sha3(key);
-        if(bytes(map[hash]).length != 0) throw;
+        if(bytes(map[hash].title).length != 0) throw;
+        itemcount++;
+
+        map[hash] = ipfsdata(itemcount, key, value, now, msg.sender, 0, 0, 0);
 
         // update data
-        map[hash] = value;
-        dmap[hash] = now;
-        pmap[hash] = msg.sender;
         listum[itemcount] = key;
         replies[hash] = associate(0);
 
@@ -76,7 +86,7 @@ contract StringMapper {
     }
 
     function addReply(bytes32 postid, string comment) payable returns(bool) {
-        if (bytes(comment).length == 0 || bytes(map[postid]).length == 0) throw;
+        if (bytes(comment).length == 0 || bytes(map[postid].title).length == 0) throw;
         replies[postid].replycount++;
         uint rid = replies[postid].replycount;
         replies[postid].posts[rid] = comment;
@@ -131,8 +141,8 @@ contract StringMapper {
             results[i-start] = title(listum[i+1]);
             bytes32 hash = sha3( listum[i+1] );
             results[i-start][4] = hash;
-            results[i-start][5] = bytes32(dmap[hash]);
-            results[i-start][6] = bytes32(pmap[hash]);
+            results[i-start][5] = bytes32(map[hash].datemark);
+            results[i-start][6] = bytes32(map[hash].poster);
         }
 
         return results; 
@@ -141,14 +151,14 @@ contract StringMapper {
     function doSha3( string testingString ) constant returns (bytes32) { return sha3( testingString ); }
 
     function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author){
-        date = dmap[hash];
-        author = pmap[hash];
-        value = map[hash];
+        date = map[hash].datemark;
+        author = map[hash].poster;
+        value = map[hash].quote;
     }
 
     function getValue(string key) constant returns(string){
         bytes32 hash = sha3( key );
-        return map[hash];
+        return map[hash].quote;
     }
 
     function getKey(uint id) constant returns (bytes32) {
@@ -182,8 +192,6 @@ contract StringMapper {
 
             if (uint(deleted[id]) != 0) { 
                 delete map[deleted[id]];
-                delete dmap[deleted[id]];
-                delete pmap[deleted[id]];
                 delete replies[deleted[id]];
                 delete_count++;
                 delete listum[id];
