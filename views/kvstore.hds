@@ -23,19 +23,20 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      <th>#</th>
-      <th>Title</th>
+      <th>Id</th>
       <th>Date</th>
+      <th>Title</th>
       <th>Author</th>
     </tr>
   </thead>
   <tbody>
 {{#kvlist}}
     <tr>
-      <td>{{id}}</td>
-      <td><a href="/post/{{hash}}">{{title}}</a></td>
-      <td>{{date}}</td>
-      <td style="font-family:monospace">{{author}}</td>
+      <td style="font-size: 2.2em">{{id}}.</td>
+      <td style="font-size: 1.25em"><br>{{date}}</td>
+      <td><br><a href="/post/{{hash}}" style="font-size: 1.55em">{{title}}</a></td>
+      <td width="500" style="font-family:monospace" align="left"><br><br>By {{author}}</td>
+
     </tr>
 {{/kvlist}}
   </tbody>

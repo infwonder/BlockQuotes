@@ -9,3 +9,55 @@
     <h3 align="center">By {{author}}</h3>
     <h4 align="center">On {{date}}</h4>
   </div>
+
+<br>
+
+<div class="container">
+  <p class="lead" align=center>
+    <a href="/reply/{{hash}}" class="btn btn-mid btn-default">Tip to comment</a>
+  </p>
+</div>
+
+{{#if comment}}
+<div class="table-responsive">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Comment</th>
+      <th>Author</th>
+    </tr>
+  </thead>
+  <tbody>
+{{#rvlist}}
+    <tr>
+      <td style="font-size: 2.5em">{{id}}.</td>
+      <td style="font-size: 1.78em"><br>{{reply}}</td>
+      <td width=500 style="font-family:monospace"><br>
+       Posted by {{author}} <br>
+       On {{date}}
+      </td>
+    </tr>
+{{/rvlist}}
+  </tbody>
+</table>
+</div>
+
+<div class "container">
+   <nav aria-label="Page navigation example">
+      <ul class="pager">
+        {{#if firstpage}}
+        <li class="previous disabled"><a class="page-link" tabindex="-1" href="#">Prev</a></li>
+        {{else}}
+        <li class="previous"><a class="page-link" style="color: black" href="/post/{{hash}}?page={{dec page}}">Prev</a></li>
+        {{/if}}
+
+        {{#if lastpage}}
+        <li class="next disabled"><a class="page-link" tabindex="-1" href="#">Next</a></li>
+        {{else}}
+        <li class="next"><a class="page-link" style="color: black" href="/post/{{hash}}?page={{inc page}}">Next</a></li>
+        {{/if}}
+      </ul>
+    </nav>
+</div>
+{{/if}}

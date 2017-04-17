@@ -104,14 +104,85 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 
   app.get('/post/:phash', function(request, response) 
   {
+    var thispage = request.query.page || 1;
     var key = request.params.phash;
 
     StrMapIns.getValueByHash(key).then((results) => 
     {
       var d = new Date(0);
       d.setUTCSeconds(web3.toDecimal(web3.toBigNumber(results[0])));
-      response.render('post', {'date': d, 'author': results[2], 'value': results[1]});
-    });
+
+      StrMapIns.getReplyCount(key).then((c) => 
+      {
+        c = web3.toDecimal(c);
+        if (c == 0) { 
+          response.render('post', {'hash': key, 'comment': false, 'date': d, 'author': results[2], 'value': results[1]});
+        } else {
+
+          var start = (thispage-1)*16;
+          var end   = start+16-1;
+          var firstpage = false; var lastpage = false;
+
+          if (start == 0) firstpage = true;
+          if (end >= c) lastpage = true;
+  
+          if (start > c) catchedError(response, 'Invalid page number ' + thispage);
+
+          StrMapIns.getReply(key, start, end).then((items) => 
+          {
+            var a = []; var id = 0;
+            items.map( (p) => 
+            {
+              var rd = new Date(0);
+              rd.setUTCSeconds(web3.toDecimal(web3.toBigNumber(p[4])));
+
+              var ts = ''; [p[0], p[1], p[2], p[3]].map( (i) => { ts += web3.toUtf8(i); });
+
+              a.push({'id': id + start, 'reply': ts, 'date': rd, 'author': web3.toHex(web3.toBigNumber(p[5]))});
+              id++;
+            });
+
+            return a;
+          }).then((array) => 
+            {
+              response.render('post', 
+                { 
+                  rvlist: array, 
+                  page: thispage, 
+                  firstpage: firstpage, 
+                  lastpage: lastpage, 
+                  comment: true, 
+                  date: d, 
+                  author: results[2], 
+                  value: results[1], 
+                  hash: key
+                });
+          }); 
+       }
+     });
+    }).catch((err) => { catchedError(response, err); });
+  });
+
+  app.get('/reply/:phash', function(request, response) 
+  {
+    var hash = request.params.phash; // need validation!
+    response.render('reply', {'hash': hash});
+  });
+
+  app.post('/reply/:phash', function(request, response) 
+  {
+    var hash = request.params.phash; // need validation!
+    var comment = request.body.thisrc;
+
+    StrMapIns.addReply(hash, comment, {from: web3.eth.accounts[1], gas: 400000}).then((result) => 
+    {
+      if (result.receipt.blockNumber === null) {
+        var err = 'Transaction ' + result.tx + ' failed ...';
+        throw(err);
+      }
+
+      response.redirect(303, '/post/' + hash);
+    }).catch((err) => { catchedError(response, err); });
   });
 
 // Query key, or redirect to add it if not found
