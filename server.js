@@ -237,5 +237,5 @@ StrMapCtr.deployed().then( (StrMapIns) =>
   });
 
 // Start it up!
-  http.createServer(app).listen(8080);
+  http.createServer(app).listen(8081);
 });
