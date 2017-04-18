@@ -1,5 +1,6 @@
 'use strict';
 const Web3 = require("web3");
+const ipfs = require("ipfs-js");
 var Contract = require("truffle-contract");
 var StrMapObj = require( __dirname + '/build/contracts/StringMapper.json');
 var MigrationsObj = require( __dirname + '/build/contracts/Migrations.json');
@@ -22,6 +23,9 @@ StrMapCtr.setProvider(web3.currentProvider);
 Migrations.setProvider(web3.currentProvider);
 
 console.log(web3.eth.accounts);
+
+// Hooking up to IPFS
+ipfs.setProvider(require("ipfs-api")('localhost','5001'));
 
 // MAIN
 
