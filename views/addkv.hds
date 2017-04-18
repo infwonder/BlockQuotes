@@ -1,17 +1,37 @@
   <div class="jumbotron">
     <div class="container">
-      <h1 align="center">Adding New Key-Value Pair:</h1>
+      <h1 align="center" id="pTitle">Adding New Key-Value Pair:</h1>
     </div>
   </div>
+
+<script src="marked.js"></script>
+
+<div class="container" id="content" style="white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
+<hr>
   <div class="container">
-    <form role="form" action="/addkey?form="newkv" id="newkv" method="POST">
+    <form role="form" action="/preview?form="newkv" id="newkv" method="POST">
       <div class="row" align=center>
         <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
         <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>
         <div class="col-md-12" align="left"><label for="thisval">The new value:</label>
-        <textarea type="text" id="thisval" name="valstr" required rows="16" cols="144" maxlength=512 form="newkv" placeholder=" e.g., my new value"></textarea></div>
+        <textarea type="text" id="thisval" style="white-space:pre" name="valstr" required rows="16" cols="144" form="newkv" placeholder=" e.g., my new value"></textarea></div>
         <div class="col-md-12"><button type="submit">Send</button></div>
       </div>
 
     </form>
   </div>
+
+<script>
+var wptitle = document.getElementById('thiskey');
+wptitle.onkeyup = wptitle.onkeypress = function(){
+    document.getElementById('pTitle').innerHTML = this.value;
+}
+</script>
+
+<script>
+var wpcontent = document.getElementById('thisval');
+wpcontent.onkeyup = wpcontent.onkeypress = function(){
+  document.getElementById('content').innerHTML = marked(this.value, {sanitize: true});
+}
+</script>
+
