@@ -8,7 +8,7 @@ contract StringMapper {
     struct ipfsdata {
       uint postid;
       string title;
-      string quote;
+      string qmhash;
       uint datemark;
       address poster;
       uint piccount;
@@ -69,14 +69,14 @@ contract StringMapper {
         }
     }
 
-    function addKeyValue(string key, string value) payable returns(bool){
-        if (bytes(key).length == 0 || bytes(value).length == 0) throw;
+    function addKeyValue(string key, string qmh) payable returns(bool){
+        if (bytes(key).length == 0 || bytes(qmh).length == 0) throw;
 
         bytes32 hash = sha3(key);
         if(bytes(map[hash].title).length != 0) throw;
         itemcount++;
 
-        map[hash] = ipfsdata(itemcount, key, value, now, msg.sender, 0, 0, 0);
+        map[hash] = ipfsdata(itemcount, key, qmh, now, msg.sender, 0, 0, 0);
 
         // update data
         listum[itemcount] = key;
@@ -150,15 +150,16 @@ contract StringMapper {
 
     function doSha3( string testingString ) constant returns (bytes32) { return sha3( testingString ); }
 
-    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author){
+    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title){
         date = map[hash].datemark;
         author = map[hash].poster;
-        value = map[hash].quote;
+        value = map[hash].qmhash;
+        title = listum[map[hash].postid];
     }
 
     function getValue(string key) constant returns(string){
         bytes32 hash = sha3( key );
-        return map[hash].quote;
+        return map[hash].qmhash;
     }
 
     function getKey(uint id) constant returns (bytes32) {

@@ -51,10 +51,35 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-function catchedError(response, error) {
+function catchedError(response, error) 
+{
   response.status(500);
   response.render("500", {"error": error});
 }
+
+String.prototype.replaceAll = function(search, replacement) 
+{
+    var target = this;
+    return target.replace(new RegExp(search, 'g'), replacement);
+};
+
+String.prototype.toAddress = function(hashtype) 
+{
+    var pl;
+    if (hashtype === 'wallet') { 
+      pl = 42; 
+    } else if (hashtype === 'sha3') {
+      pl = 66;
+    } else {
+      throw('Invalid hashtype!');
+    }
+
+    var addr = String(web3.toHex(web3.toBigNumber(this)));
+    if (addr.length === pl) return addr
+    var pz = pl - addr.length;
+    addr = addr.replace('0x', '0x' + '0'.repeat(pz));
+    return addr;
+};
 
 StrMapCtr.deployed().then( (StrMapIns) =>
 {
@@ -84,6 +109,8 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 
       if (start > ic) catchedError(response, 'Invalid page number ' + thispage);
 
+      console.log("itemcount: " + ic + " start: " + start + " end: " + end);
+
       StrMapIns.dumpData(start, end).then((items) => 
       {
         var a = []; var id = 0;
@@ -94,7 +121,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 
           var ts = ''; [p[0], p[1], p[2], p[3]].map( (i) => { ts += web3.toUtf8(i); });
 
-          a.push({'id': id + start, 'title': ts, 'hash': web3.toHex(web3.toBigNumber(p[4])), 'date': d, 'author': web3.toHex(web3.toBigNumber(p[6]))});
+          a.push({'id': id + start, 'title': ts, 'hash': p[4].toAddress('sha3'), 'date': d, 'author': p[6].toAddress('wallet')});
           id++;
         });
     
@@ -106,64 +133,91 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     });
   });
 
+// testing binary (image at the moment) upload to IPFS
+// this will eventually become part of /addkey
+  app.get('/gallery', function(request, response) 
+  {
+    response.render('gallery'); 
+  });
+
   app.get('/post/:phash', function(request, response) 
   {
+    console.log("called post");
     var thispage = request.query.page || 1;
     var key = request.params.phash;
+ 
+    console.log("key: " + key);
 
     StrMapIns.getValueByHash(key).then((results) => 
     {
+      console.log(JSON.stringify(results, null, 2));
       var d = new Date(0);
+      var ipfshash = 'Qm' + results[1]; console.log("ipfs: " + ipfshash);
       d.setUTCSeconds(web3.toDecimal(web3.toBigNumber(results[0])));
-
-      StrMapIns.getReplyCount(key).then((c) => 
+      ipfs.cat(ipfshash, (err, buf) => 
       {
-        c = web3.toDecimal(c);
-        if (c == 0) { 
-          response.render('post', {'hash': key, 'comment': false, 'date': d, 'author': results[2], 'value': results[1]});
-        } else {
-
-          var start = (thispage-1)*16;
-          var end   = start+16-1;
-          var firstpage = false; var lastpage = false;
-
-          if (start == 0) firstpage = true;
-          if (end >= c) lastpage = true;
+        var thisval = buf.toString(); var aaa = [];
+        thisval.split(/\n\r|\n|\r/).map((i) => { 
+          if (!i) i = '\\n';
+          i = i.replaceAll("'", "\\'");
+          i = i.replaceAll(";", "\\;");
+          aaa.push(i); 
+        });
+        aaa = aaa.join('');
+         
+        StrMapIns.getReplyCount(key).then((c) => 
+        {
+          c = web3.toDecimal(c);
   
-          if (start > c) catchedError(response, 'Invalid page number ' + thispage);
-
-          StrMapIns.getReply(key, start, end).then((items) => 
-          {
-            var a = []; var id = 0;
-            items.map( (p) => 
+          if (c == 0) { 
+            response.render('post', {title: results[3], hash: key, comment: false, date: d, author: results[2], value: aaa});
+          } else {
+  
+            var start = (thispage-1)*16;
+            var end   = start+16-1;
+            var firstpage = false; var lastpage = false;
+  
+            if (start == 0) firstpage = true;
+            if (end >= c) lastpage = true;
+    
+            if (start > c) catchedError(response, 'Invalid page number ' + thispage);
+  
+            StrMapIns.getReply(key, start, end).then((items) => 
             {
-              var rd = new Date(0);
-              rd.setUTCSeconds(web3.toDecimal(web3.toBigNumber(p[4])));
+              var a = []; var id = 0;
+              items.map( (p) => 
+              {
+                var rd = new Date(0);
+                rd.setUTCSeconds(web3.toDecimal(web3.toBigNumber(p[4])));
+  
+                var ts = ''; [p[0], p[1], p[2], p[3]].map( (i) => { ts += web3.toUtf8(i); });
+  
+                a.push({'id': id + start, 'reply': ts, 'date': rd, 'author': web3.toHex(web3.toBigNumber(p[5]))});
+                id++;
+              });
+  
+              return a;
+            }).then((array) => 
+              {
+                response.render('post', 
+                  { 
+                    rvlist: array, 
+                    page: thispage, 
+                    firstpage: firstpage, 
+                    lastpage: lastpage, 
+                    comment: true, 
+                    date: d, 
+                    author: results[2], 
+                    value: aaa, 
+                    hash: key,
+                    title: results[3]
+                  });
+            }); 
+         }
+       });
+      });
 
-              var ts = ''; [p[0], p[1], p[2], p[3]].map( (i) => { ts += web3.toUtf8(i); });
 
-              a.push({'id': id + start, 'reply': ts, 'date': rd, 'author': web3.toHex(web3.toBigNumber(p[5]))});
-              id++;
-            });
-
-            return a;
-          }).then((array) => 
-            {
-              response.render('post', 
-                { 
-                  rvlist: array, 
-                  page: thispage, 
-                  firstpage: firstpage, 
-                  lastpage: lastpage, 
-                  comment: true, 
-                  date: d, 
-                  author: results[2], 
-                  value: results[1], 
-                  hash: key
-                });
-          }); 
-       }
-     });
     }).catch((err) => { catchedError(response, err); });
   });
 
@@ -215,18 +269,25 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     var thiskey = request.body.keystr;
     var thisval = request.body.valstr;
 
-    StrMapIns.addKeyValue(thiskey, thisval, {from: web3.eth.accounts[1], gas: 400000}).then((result) => 
-    {
-      if (result.receipt.blockNumber === null) {
-        var err = 'Transaction ' + result.tx + ' failed ...';
-        throw(err);
-      }
-      
-      var array = [{key: thiskey, hash: web3.sha3(thiskey), value: thisval}]; // for speed sake, but probably not right...
-      response.render('result', {kvlist: array});
-    })
-    .catch((err) => { catchedError(response, err); });
-    
+    // Store thisval on IPFS
+    ipfs.add(thisval, (err, hash) => {
+      if (err) throw(err);
+
+      var qmhash = hash.substr(2);   
+ 
+      StrMapIns.addKeyValue(thiskey, qmhash, {from: web3.eth.accounts[1], gas: 400000}).then((result) => 
+      {
+        if (result.receipt.blockNumber === null) {
+          var err = 'Transaction ' + result.tx + ' failed ...';
+          throw(err);
+        }
+        
+        var array = [{key: thiskey, hash: web3.sha3(thiskey), value: hash}]; // for speed sake, but probably not right...
+        response.render('result', {kvlist: array});
+      })
+      .catch((err) => { catchedError(response, err); });
+
+    });
   });
 
 // About page

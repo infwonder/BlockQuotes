@@ -1,6 +1,6 @@
   <div class="jumbotron">
     <div class="container">
-      <h1 align="center">Welcome to My </h1><h1 align="center">Ethereum Gossip DApp!</h1>
+      <h1 align="center">Welcome to BlockQuotes</h1><h3 align="center">An Ethereum Dapp for Blogging and Note-taking!</h3>
       <form role="form" action="/querykey?form="querykey" method="POST">
       <div align="center">
       <br><br><label for="keyquery">Please enter key:</label>

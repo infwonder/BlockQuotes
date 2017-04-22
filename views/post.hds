@@ -1,7 +1,7 @@
   <div class="jumbotron">
     <div class="container">
       <br>
-      <h1 align="center">{{value}}</h1>
+      <h1 align="center">{{title}}</h1>
     </div>
   </div>
 
@@ -18,7 +18,11 @@
   </p>
 </div>
 
+<div class="container" id="content" style="margin: 0 auto; white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
+
 {{#if comment}}
+<hr>
+
 <div class="table-responsive">
 <table class="table table-striped">
   <thead>
@@ -61,3 +65,10 @@
     </nav>
 </div>
 {{/if}}
+
+<script src="/marked.js"></script>
+
+<script>
+  var article = '{{{value}}}';
+  document.getElementById('content').innerHTML = marked(article, {sanitize: true});
+</script>

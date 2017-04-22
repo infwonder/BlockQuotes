@@ -4,12 +4,13 @@
     </div>
   </div>
 
-<script src="marked.js"></script>
+<script src="/marked.js"></script>
 
-<div class="container" id="content" style="white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
+<div class="container" id="content" style="margin: 0 auto; white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
+
 <hr>
   <div class="container">
-    <form role="form" action="/preview?form="newkv" id="newkv" method="POST">
+    <form role="form" action="/addkey?form="newkv" name="newkv" id="newkv" method="POST">
       <div class="row" align=center>
         <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
         <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>
@@ -34,4 +35,3 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
   document.getElementById('content').innerHTML = marked(this.value, {sanitize: true});
 }
 </script>
-
