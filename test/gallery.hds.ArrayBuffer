@@ -1,0 +1,93 @@
+<link href="/bower_components/lightbox2/dist/css/lightbox.css" rel="stylesheet">
+<script src="/bower_components/lightbox2/dist/js/lightbox.js"></script>
+
+<div class="container">
+<table>
+
+      <tr>
+        <td colspan="3">
+          <form name="bintxt" style="display:none">
+            <input id="totalPics" name="total" value=0 />
+            <button type="submit">Send</button>
+          </form>
+        </td>
+      </tr>
+
+<!--
+
+      <tr>
+        <td>Filename to Save As:</td>
+        <td><input id="inputFileNameToSaveAs" /></td>
+        <td><button onclick="saveImage()">Save file</button></td>
+      </tr>
+-->
+
+      <tr>
+        <td>Select a File to Load:</td>
+        <td><input type="file" id="fileToLoad" /></td>
+          <td><button onclick="loadImage()">Load file</button></td>
+      </tr>
+
+      <tr id="imgRow">
+      </tr>
+
+ </table>
+</div>
+
+<script>
+  function addHidden(theForm, value) {
+    // Create a hidden input element, and append it to the form:
+    var input = document.createElement('input');
+    var picno = document.getElementById('totalPics');
+    var count = picno.value; count++;
+    picno.value = count;
+    console.log("Now we have " + count + " picture(s) in total...");
+
+    var key   = 'img' + count;
+
+    input.type = 'hidden';
+    input.name = key; // name-as-seen-at-the-server
+    input.value = value;
+    theForm.appendChild(input);
+  }
+
+  window.loadImage = function() {
+    var file = document.getElementById("fileToLoad").files[0];
+    var b2tForm = document.forms.bintxt;
+
+    var reader = new FileReader();
+    reader.onload = function(event) {
+      var data = event.target.result;
+
+      var data16 = new Uint16Array(data);
+      var text = [];
+        for(i = 0; i<data16.length; i++){
+            text.push(data16[i]);
+        }
+
+      addHidden(b2tForm, text);
+
+      var row = document.getElementById("imgRow");
+
+      var dataURLReader = new FileReader();
+      dataURLReader.onload = function(event) {
+        // Parse image properties
+        var dataURL = event.target.result;
+        contentType = dataURL.split(",")[0].split(":")[1].split(";")[0];
+
+        var image = new Image(500,500);
+        image.src = dataURL;
+        image.onload = function() {
+          console.log("Image type: " + contentType);
+          console.log("Image width: " + this.width);
+          console.log("Image height: " + this.height);
+          var x = row.insertCell(0);
+          x.appendChild(this);
+        };
+      };
+      dataURLReader.readAsDataURL(file);
+    };
+
+    reader.readAsArrayBuffer(file);
+  }
+</script>

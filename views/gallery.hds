@@ -1,0 +1,187 @@
+<script src="/ipfs.min.js"></script>
+<div class="container">
+<table>
+      <tr>
+        <td id="dataCell" colspan="3">
+          <input id="totalPics" name="total" value=0 />
+          <button onclick="saveImageOnIPFS()">Upload to IPFS</button>
+        </td>
+      </tr>
+
+<!--
+      <tr>
+        <td>Filename to Save As:</td>
+        <td><input id="imgkey" /></td>
+        <td><input id="inputFileNameToSaveAs" /></td>
+        <td><button onclick="saveImage()">Save file</button></td>
+      </tr>
+-->
+
+      <tr>
+        <td>Select a File to Load:</td>
+        <td><input type="file" id="fileToLoad" /></td>
+          <td><button onclick="loadImage()">Preview & Encode</button></td>
+      </tr>
+
+      <tr id="imgRow">
+        <td><input id="imgkey" /></td>
+        <td><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
+      </tr>
+
+ </table>
+</div>
+
+<script>
+  function addHidden(value) {
+    // Create a hidden input element, and append it to the form:
+    var input = document.createElement('input');
+    var picno = document.getElementById('totalPics');
+    var count = picno.value; count++;
+    picno.value = count;
+    console.log("Now we have " + count + " picture(s) in total...");
+
+    var key   = 'img' + count;
+
+    input.type = 'hidden';
+    input.name = key; // name-as-seen-at-the-server
+    input.id = key;
+    input.value = value;
+    var row = document.getElementById("dataCell");
+    row.appendChild(input);
+  }
+
+  window.loadImage = function() {
+    var file = document.getElementById("fileToLoad").files[0];
+
+    var reader = new FileReader();
+//    var row = document.getElementById("imgRow");
+
+    var dataURLReader = new FileReader();
+    dataURLReader.onload = function(event) {
+      // Parse image properties
+      var dataURL = event.target.result;
+      contentType = dataURL.split(",")[0].split(":")[1].split(";")[0];
+
+      var image = new Image();
+      image.src = dataURL;
+
+      image.onload = function() {
+        addHidden(dataURL);
+
+        console.log("Image type: " + contentType);
+        console.log("Image width: " + this.width);
+        console.log("Image height: " + this.height);
+
+
+//        image.width = this.width/this.height*500;
+//        image.height = 500;
+
+//        console.log("IMG Frame width: " + image.width);
+//        console.log("IMG Frame height: " + image.height);
+
+//        var x = row.insertCell(0);
+//        x.appendChild(this);
+      };
+    };
+    dataURLReader.readAsDataURL(file);
+  };
+
+/*
+  function destroyClickedElement(event) {
+    document.body.removeChild(event.target);
+  }
+
+  window.saveImage = function() {
+    var keyname = document.getElementById('imgkey').value; console.log(keyname);
+    var dataURL = document.getElementById("img" + keyname).value; console.log(dataURL);
+
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    var byteString = atob(dataURL.split(',')[1]);
+
+    // separate out the mime component
+    var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0]
+
+    // write the bytes of the string to an ArrayBuffer
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    // write the ArrayBuffer to a blob, and you're done
+    var blob = new Blob([ia], {type: mimeString});
+
+    var fileNameToSaveAs = document.getElementById("inputFileNameToSaveAs").value;
+
+    var downloadLink = document.createElement("a");
+    downloadLink.download = fileNameToSaveAs;
+    downloadLink.innerHTML = "Download File";
+
+    // Firefox requires the link to be added to the DOM
+    // before it can be clicked.
+    downloadLink.href = window.URL.createObjectURL(blob);
+    downloadLink.onclick = destroyClickedElement;
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+
+    downloadLink.click();
+  }
+*/
+
+  window.displayImageOnIPFS = function() 
+  {
+    ipfs.setProvider({host: 'localhost', port: '5001'});
+    var ipfshash = document.getElementById("imgkey").value; console.log("IPFS Hash: " + ipfshash);
+    ipfs.catText(ipfshash, function(err, dataURL) 
+    {
+      if(err) throw(err);
+
+      var byteString = atob(dataURL.split(',')[1]);
+      var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0]
+
+/*     
+      // write the bytes of the string to an ArrayBuffer
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      // write the ArrayBuffer to a blob, and you're done
+      var blob = new Blob([ia], {type: mimeString});
+*/
+      
+      var image = new Image();
+      image.src = dataURL;
+
+      image.onload = function () {
+        image.width = this.width/this.height*500;
+        image.height = 500;
+        var row = document.getElementById("imgRow");
+
+        var x = row.insertCell(0);
+        x.appendChild(this);
+      };
+    });
+  };
+
+  window.saveImageOnIPFS = function() {
+    ipfs.setProvider({host: 'localhost', port: '5001'});
+    var total = document.getElementById('totalPics').value;
+
+    for (var i=1; i<=total; i++) {
+      console.log("img" + i + ":"); var pn = "img" + i;
+      var dataURL = document.getElementById(pn).value;
+      ipfs.add(dataURL, (err,hash) => 
+      {
+        if (err) throw(err);
+        console.log(hash);
+      });
+    }
+  };
+
+</script>
+
+<link href="/bower_components/lightbox2/dist/css/lightbox.css" rel="stylesheet">
+<script src="/bower_components/lightbox2/dist/js/lightbox.js"></script>

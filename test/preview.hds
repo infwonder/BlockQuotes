@@ -1,0 +1,12 @@
+<div class="jumbotron">
+  <h3 align="center">{{key}}</h3>
+</div>
+
+<script src="marked.js"></script>
+
+<div class="container" id="content" style="white-space: pre"></div>
+
+<script>
+  document.getElementById('content').innerHTML =
+    marked('{{val}}', {sanitize: true});
+</script>
