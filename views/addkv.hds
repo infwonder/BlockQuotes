@@ -7,7 +7,7 @@
 <script src="/marked.js"></script>
 <script src="/ipfs.min.js"></script>
 
-<div class="jumbotron">
+<div class="container">
 <table id="imgPre" align="center" class="picture-frame" >
   <tr></tr>
 </table>
@@ -128,10 +128,12 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
         var tb = document.getElementById("imgPre");
         var row = tb.rows[tb.rows.length-1];
 
-        var pal = '';
+        var pal = 'center';
+/*
         if (row.cells.length % 3 === 0) pal = 'right';
         if (row.cells.length % 3 === 1) pal = 'center';
         if (row.cells.length % 3 === 2) pal = 'left';
+*/
 
         if (row.cells.length < 3) {
           var x = row.insertCell(-1);
