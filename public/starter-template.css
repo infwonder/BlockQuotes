@@ -24,3 +24,26 @@ body {
 //  border: 1px solid #ddd;
 //  border: 1px solid rgba(86,61,124,.2);
 }
+
+table.picture-frame {
+  width: auto;
+  table-layout:fixed;
+}
+
+.picture-frame tr {
+  width: 1em;
+}
+
+.picture-frame td {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+img.hover-shadow {
+  transition: 0.3s;
+}
+
+.hover-shadow:hover {
+  transform: scale(1.08);
+  //box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
