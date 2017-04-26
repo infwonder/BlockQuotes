@@ -5,17 +5,49 @@
   </div>
 
 <script src="/marked.js"></script>
+<script src="/ipfs.min.js"></script>
+
+<div class="jumbotron">
+<table id="imgPre" align="center" class="picture-frame" >
+  <tr></tr>
+</table>
+</div>
+
+<br>
 
 <div class="container" id="content" style="margin: 0 auto; white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
 
 <hr>
+  <div class="container">
+  <table align="center">
+        <tr>
+          <td align="center">Select a File to Load:</td>
+          <td><input type="file" id="fileToLoad" /></td>
+          <td><button onclick="loadImage()">Preview & Encode</button></td>
+          <td id="dataCell" colspan="3">
+            <input id="totalPics" name="total" value=0 />
+            <button onclick="saveImageOnIPFS()">Upload to IPFS</button>
+          </td>
+        </tr>
+   </table>
+  
+  <br><br><br><br>
+  
+  <table align="center">
+        <tr>
+          <td align="center"><input id="imgkey" size=64></td>
+          <td align="center"><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
+        </tr>
+   </table>
+  </div>
+
   <div class="container">
     <form role="form" action="/addkey?form="newkv" name="newkv" id="newkv" method="POST">
       <div class="row" align=center>
         <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
         <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>
         <div class="col-md-12" align="left"><label for="thisval">The new value:</label>
-        <textarea type="text" id="thisval" style="white-space:pre" name="valstr" required rows="16" cols="144" form="newkv" placeholder=" e.g., my new value"></textarea></div>
+       <textarea type="text" id="thisval" style="white-space:pre" name="valstr" required rows="16" cols="144" form="newkv" placeholder=" e.g., my new value"></textarea></div>
         <div class="col-md-12"><button type="submit">Send</button></div>
       </div>
 
@@ -35,3 +67,170 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
   document.getElementById('content').innerHTML = marked(this.value, {sanitize: true});
 }
 </script>
+
+<script>
+  function addHidden(value) {
+    // Create a hidden input element, and append it to the form:
+    var input = document.createElement('input');
+    var picno = document.getElementById('totalPics');
+    var count = picno.value; count++;
+    picno.value = count;
+    console.log("Now we have " + count + " picture(s) in total...");
+
+    var key   = 'img' + count;
+
+    input.type = 'hidden';
+    input.name = key; // name-as-seen-at-the-server
+    input.id = key;
+    input.value = value;
+    var row = document.getElementById("dataCell");
+    row.appendChild(input);
+  }
+
+  window.loadImage = function() {
+    var file = document.getElementById("fileToLoad").files[0];
+    var reader = new FileReader();
+
+    var dataURLReader = new FileReader();
+    dataURLReader.onload = function(event) {
+      // Parse image properties
+      var dataURL = event.target.result;
+      var byteString = atob(dataURL.split(',')[1]);
+      contentType = dataURL.split(",")[0].split(":")[1].split(";")[0];
+
+      var image = new Image();
+      image.src = dataURL;
+      image.className = "hover-shadow";
+
+      // write the bytes of the string to an ArrayBuffer
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      // write the ArrayBuffer to a blob, and you're done
+      var blob = new Blob([ia], {type: contentType});
+
+      var ai = document.createElement('a');
+      ai.href = URL.createObjectURL(blob);
+
+      image.onload = function() {
+        image.width = this.width/this.height*500;
+        image.height = 500;
+        addHidden(dataURL);
+
+        console.log("Image type: " + contentType);
+        console.log("Image width: " + this.width);
+        console.log("Image height: " + this.height);
+        ai.appendChild(this);
+
+        var tb = document.getElementById("imgPre");
+        var row = tb.rows[tb.rows.length-1];
+
+        var pal = '';
+        if (row.cells.length % 3 === 0) pal = 'right';
+        if (row.cells.length % 3 === 1) pal = 'center';
+        if (row.cells.length % 3 === 2) pal = 'left';
+
+        if (row.cells.length < 3) {
+          var x = row.insertCell(-1);
+          x.style.border = "3px solid #eee";
+          x.align = pal;
+          x.appendChild(ai);
+        } else {
+          var x = tb.insertRow(-1);
+          var y = x.insertCell(0);
+          y.style.border = "3px solid #eee";
+          y.align = pal;
+          y.appendChild(ai);
+        }
+      };
+    };
+    dataURLReader.readAsDataURL(file);
+  };
+
+  window.displayImageOnIPFS = function() 
+  {
+    ipfs.setProvider({host: 'localhost', port: '5001'});
+    var ipfshash = document.getElementById("imgkey").value; console.log("IPFS Hash: " + ipfshash);
+    ipfs.catText(ipfshash, function(err, dataURL) 
+    {
+      if(err) throw(err);
+
+      var byteString = atob(dataURL.split(',')[1]);
+      var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+
+
+      // write the bytes of the string to an ArrayBuffer
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      // write the ArrayBuffer to a blob, and you're done
+      var blob = new Blob([ia], {type: mimeString});
+
+      var ai = document.createElement('a');
+      ai.href = URL.createObjectURL(blob);
+
+      var image = new Image();
+      image.src = dataURL;
+      image.className = "hover-shadow";
+      image.id = ipfshash;
+
+      image.onload = function () {
+        image.width = this.width/this.height*250;
+        image.height = 250;
+        ai.appendChild(this);
+
+        var tb = document.getElementById("imgTBL");
+        var row = tb.rows[tb.rows.length-1];
+
+        if (row.cells.length < 3) {
+          var x = row.insertCell(0);
+          x.style.border = "3px solid #eee";
+          x.appendChild(ai);
+        } else {
+          var x = tb.insertRow(-1);
+          var y = x.insertCell(0);
+          y.style.border = "3px solid #eee";
+          y.appendChild(ai);
+        }
+      };
+
+
+
+/*
+      image.onclick = function() {
+        if (image.height === 250) {
+          image.width = this.width*1.5;
+          image.height = this.height*1.5;
+        } else {
+          image.width = this.width/this.height*250;
+          image.height = 250;
+        }
+      };
+*/
+
+    });
+  };
+
+  window.saveImageOnIPFS = function() {
+    ipfs.setProvider({host: 'localhost', port: '5001'});
+    var total = document.getElementById('totalPics').value;
+
+    for (var i=1; i<=total; i++) {
+      console.log("img" + i + ":"); var pn = "img" + i;
+      var dataURL = document.getElementById(pn).value;
+      ipfs.add(dataURL, (err,hash) => 
+      {
+        if (err) throw(err);
+        console.log(hash);
+      });
+    }
+  };
+
+</script>
+
