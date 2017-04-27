@@ -94,6 +94,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     input.type = 'hidden';
     input.name = key; // name-as-seen-at-the-server
     input.id = key;
+    input.className = 'durl';
     input.value = value;
     var row = document.getElementById("dataCell");
     row.appendChild(input);
@@ -309,18 +310,25 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     });
 
     var total = document.getElementById('totalPics').value;
+    var allimgs = document.getElementsByClassName('durl');
 
-    for (var i=1; i<=total; i++) {
-      console.log("img" + i + ":"); var pn = "img" + i;
-      var dataURL = document.getElementById(pn).value;
-      var inputp = document.getElementById('ipfs-img'+i);
-      ipfs.add(dataURL, (err,hash) => 
+    function updateHash(i) {
+      ipfs.add(allimgs[i].value, (err, hash) => 
       {
-        if (err) throw(err);
-        inputp.value = hash;
-        console.log(hash);
+        if (err) { 
+          throw(err);
+        } else {
+          var pn = allimgs[i].name;
+          var h = document.getElementById('ipfs-' + pn);
+          h.value = hash;
+          console.log(hash); 
+        }
       });
     }
+
+    for (var i=0; i<allimgs.length; i++) {
+      updateHash(i);
+    } 
   };
 
 </script>
