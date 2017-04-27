@@ -21,7 +21,7 @@
 
 <div class="container" id="content" style="margin: 0 auto; white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
 
-<div class="container">
+<div class="container" align="center" id="editor">
       <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
       <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>
       <div class="col-md-12" align="left"><label for="thisval">The new value:</label>
@@ -42,18 +42,19 @@
         <td align="right" style="display:none"><input id="totalPics" size=6 name="total" value=0 /> image(s) loaded</td>
       </tr>
 </table>
-<table id="dataCell">
-</table>
 <br>
-<button onclick="saveImageOnIPFS()">Upload to IPFS</button>
+
+<table id="dataCell" align="center">
+</table>
+<br><br>
+<button align="center" onclick="saveImageOnIPFS()">Upload to IPFS</button>
 </div>
 
 <hr>
   <div align="center" class="container">
     <form role="form" action="/addkey?form='newkv'" name="newkv" id="newkv" method="POST">
       <input id="totalHashs" name="totalHashs" value=0 style="display:none" />
-      <button id="BlockChainIt" type="submit" disabled=true>Send</button>
-      </div>
+      <p align="center"><button id="BlockChainIt" type="submit" disabled=true>Submit the following IPFS hash(s)</button></p>
     </form>
   </div>
 <hr>
@@ -105,12 +106,14 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     inputp.name = 'ipfs-' + key;
     inputp.id = 'ipfs-' + key;
     inputp.size = 96;
+    inputp.style = 'display:none';
     inputp.onchange = ruReady(inputp.name);
 
     kvform.appendChild(inputp);
 
     var btnp = document.createElement('button');
     btnp.type = 'button';
+    btnp.style.width = '400px';
     btnp.name = 'reset' + 'ipfs-' + key;
     btnp.id = 'reset' + 'ipfs-' + key;
     btnp.onclick = function() {
@@ -290,6 +293,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     console.log("allpic+1: " + v);
     if (allhsh.value == v) { 
       subbtn.disabled = false;
+      document.getElementById('editor').style = "display:none";
     }
   }
 
@@ -324,6 +328,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
           var pn = allimgs[i].name;
           var h = document.getElementById('ipfs-' + pn);
           h.value = hash;
+          h.style = '';
           console.log(hash); 
         }
       });
