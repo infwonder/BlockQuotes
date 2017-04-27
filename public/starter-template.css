@@ -26,22 +26,23 @@ body {
 }
 
 div.jumboframe {
-  width: 2048px;
+  width: 104%;
   height: 550px;
-//  margin: 0 auto;
+  margin: 0 auto;
   overflow: scroll;
 }
 
 div.jumboframe-wrapper {
-  width: 90%;
+  width: 80%;
   height: 500px;
   margin: 0 auto;
   overflow: hidden;
-  border: 1px solid #ddd;
+  //border: 1px solid #ddd;
 }
 
 table.picture-frame {
   width: auto;
+  margin: 0 auto;
   table-layout:fixed;
 }
 

@@ -2,22 +2,27 @@
 <div class="container">
 <table align="center">
       <tr>
-        <td align="center">Select a File to Load:</td>
-        <td><input type="file" id="fileToLoad" /></td>
-        <td><button onclick="loadImage()">Preview & Encode</button></td>
-        <td id="dataCell" colspan="3">
-          <input id="totalPics" name="total" value=0 />
-          <button onclick="saveImageOnIPFS()">Upload to IPFS</button>
-        </td>
+        <td align="center" colspan="2"><input id="imgkey" size=64></td>
+        <td align="left" colspan="2"><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
       </tr>
- </table>
-
-<br><br><br><br>
-
-<table align="center">
       <tr>
-        <td align="center"><input id="imgkey" size=64></td>
-        <td align="center"><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
+        <td id="dataCell" colspan="4"></td>
+      </tr>
+      <tr>
+        <td align="center" colspan="1">Select a File to Load:</td>
+        <td align="right" colspan="3"><input type="file" id="fileToLoad" /></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="block">
+        <td align="left"><button onclick="saveImageOnIPFS()">Upload to IPFS</button></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="block">
+        <td align="left"><button onclick="loadImage()">Preview & Encode</button></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="block">
+        <td align="left"><input id="totalPics" name="total" value=0 /></td>
       </tr>
  </table>
 </div>
@@ -90,8 +95,10 @@
       ai.href = URL.createObjectURL(blob);
 
       image.onload = function() {
-        image.width = this.width/this.height*500;
-        image.height = 500;
+        image.height = 973/this.width*this.height;
+        image.width  = 973;
+//        image.width = this.width/this.height*500;
+//        image.height = 500;
         addHidden(dataURL);
 
         console.log("Image type: " + contentType);
@@ -107,7 +114,7 @@
         if (row.cells.length % 3 === 1) pal = 'center';
         if (row.cells.length % 3 === 2) pal = 'left';
 
-        if (row.cells.length < 3) {
+        if (row.cells.length < 30) {
           var x = row.insertCell(-1);
           x.style.border = "3px solid #eee";
           x.align = pal;

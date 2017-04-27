@@ -7,52 +7,59 @@
 <script src="/marked.js"></script>
 <script src="/ipfs.min.js"></script>
 
-<div class="container">
-<table id="imgPre" align="center" class="picture-frame" >
+<div id="picFrame" class="jumbotron" style="display:none;">
+<div class="jumboframe-wrapper">
+<div class="jumboframe">
+<table id="imgPre" class="picture-frame" >
   <tr></tr>
 </table>
+</div>
+</div>
 </div>
 
 <br>
 
 <div class="container" id="content" style="margin: 0 auto; white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
 
+<div class="container">
+      <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
+      <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>
+      <div class="col-md-12" align="left"><label for="thisval">The new value:</label>
+      <textarea type="text" id="thisval" style="white-space:pre" required rows="16" cols="144" placeholder=" e.g., my new value"></textarea></div>
+      <br>
+  <table align="center">
+      <tr style="display:none">
+        <td align="center" colspan="2"><input id="imgkey" size=64></td>
+        <td align="left" colspan="2"><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
+      </tr>
+      <tr>
+        <td id="dataCell" colspan="4"></td>
+      </tr>
+      <tr style="display:none;">
+        <td colspan="2" style="block">
+        <td align="left"><button onclick="loadImage()">Preview & Encode</button></td>
+      </tr>
+      <tr>
+        <td align="left">Select a File to Load:</td>
+        <td align="left" colspan="3"><input type="file" id="fileToLoad" onchange="loadImage()"/></td>
+        <td align="right" style="display:none"><input id="totalPics" size=6 name="total" value=0 /> image(s) loaded</td>
+      </tr>
+      <tr>
+        <td colspan="3" align="right"><br><button onclick="saveImageOnIPFS()">Upload to IPFS</button></td>
+      </tr>
+  </table>
+</div>
+
 <hr>
-  <div class="container">
-  <table align="center">
-        <tr>
-          <td align="center">Select a File to Load:</td>
-          <td><input type="file" id="fileToLoad" /></td>
-          <td><button onclick="loadImage()">Preview & Encode</button></td>
-          <td id="dataCell" colspan="3">
-            <input id="totalPics" name="total" value=0 />
-            <button onclick="saveImageOnIPFS()">Upload to IPFS</button>
-          </td>
-        </tr>
-   </table>
-  
-  <br><br><br><br>
-  
-  <table align="center">
-        <tr>
-          <td align="center"><input id="imgkey" size=64></td>
-          <td align="center"><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
-        </tr>
-   </table>
-  </div>
-
-  <div class="container">
-    <form role="form" action="/addkey?form="newkv" name="newkv" id="newkv" method="POST">
-      <div class="row" align=center>
-        <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
-        <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>
-        <div class="col-md-12" align="left"><label for="thisval">The new value:</label>
-       <textarea type="text" id="thisval" style="white-space:pre" name="valstr" required rows="16" cols="144" form="newkv" placeholder=" e.g., my new value"></textarea></div>
-        <div class="col-md-12"><button type="submit">Send</button></div>
+  <div align="center" class="container">
+    <form role="form" action="/addkey?form='newkv'" name="newkv" id="newkv" method="POST">
+      <input id="totalHashs" name="totalHashs" value=0 style="display:none" />
+      <button id="BlockChainIt" type="submit" disabled=true>Send</button>
       </div>
-
     </form>
   </div>
+<hr>
+
 
 <script>
 var wptitle = document.getElementById('thiskey');
@@ -69,13 +76,18 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
 </script>
 
 <script>
-  function addHidden(value) {
-    // Create a hidden input element, and append it to the form:
+  function addHidden(value, fn) {
+    // Create a hidden input element:
+    var kvform = document.forms.namedItem('newkv');
     var input = document.createElement('input');
     var picno = document.getElementById('totalPics');
+    var thash = document.getElementById('totalHashs');
     var count = picno.value; count++;
     picno.value = count;
     console.log("Now we have " + count + " picture(s) in total...");
+
+    var picframe = document.getElementById('picFrame');
+    if (count != 0) picframe.style = 'display:all; background-color: #fff' ;
 
     var key   = 'img' + count;
 
@@ -85,11 +97,52 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     input.value = value;
     var row = document.getElementById("dataCell");
     row.appendChild(input);
+
+    // preparing input for newkv form (no value yet)
+    var inputp = document.createElement('input');
+    inputp.name = 'ipfs-' + key;
+    inputp.id = 'ipfs-' + key;
+    inputp.size = 96;
+    inputp.onchange = ruReady(inputp.name);
+
+    kvform.appendChild(inputp);
+
+    var btnp = document.createElement('button');
+    btnp.type = 'button';
+    btnp.name = 'reset' + 'ipfs-' + key;
+    btnp.id = 'reset' + 'ipfs-' + key;
+    btnp.onclick = function() {
+      var picn = document.getElementById('totalPics');
+      var thsh = document.getElementById('totalHashs');
+      var i = document.getElementById(this.name.substr(5));
+      i.parentNode.removeChild(i); console.log(this.id);
+      var k = document.getElementById(this.name.substr(10));
+      k.parentNode.removeChild(k);
+      var t = document.getElementById('thumb-'+ fn);
+      t.parentNode.removeChild(t);
+      var a = document.getElementById('blob-'+ fn);
+      a.parentNode.removeChild(a);
+      var r = document.getElementById('tb-row-'+ fn);
+      r.parentNode.removeChild(r);
+      this.parentNode.removeChild(this);
+      if (picn.value > 0) { 
+        picn.value--;
+        if (picn.value == 0) {
+          console.log("Picn is now 0");
+          var pframe = document.getElementById('picFrame');
+          pframe.style = "display:none"; 
+        } 
+      }
+      if (thsh.value > 0) thsh.value--;
+    }
+   btnp.innerHTML = 'delete ' + fn;
+   row.appendChild(btnp);
   }
 
   window.loadImage = function() {
     var file = document.getElementById("fileToLoad").files[0];
     var reader = new FileReader();
+    var fname = file.name;
 
     var dataURLReader = new FileReader();
     dataURLReader.onload = function(event) {
@@ -101,6 +154,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
       var image = new Image();
       image.src = dataURL;
       image.className = "hover-shadow";
+      image.id = 'thumb-' + fname;
 
       // write the bytes of the string to an ArrayBuffer
       var ab = new ArrayBuffer(byteString.length);
@@ -114,11 +168,12 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
 
       var ai = document.createElement('a');
       ai.href = URL.createObjectURL(blob);
+      ai.id = 'blob-' + fname;
 
       image.onload = function() {
         image.width = this.width/this.height*500;
         image.height = 500;
-        addHidden(dataURL);
+        addHidden(dataURL, fname);
 
         console.log("Image type: " + contentType);
         console.log("Image width: " + this.width);
@@ -137,12 +192,14 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
 
         if (row.cells.length < 3) {
           var x = row.insertCell(-1);
+          x.id = 'tb-row-' + fname;
           x.style.border = "3px solid #eee";
           x.align = pal;
           x.appendChild(ai);
         } else {
           var x = tb.insertRow(-1);
           var y = x.insertCell(0);
+          y.id = 'tb-row-' + fname;
           y.style.border = "3px solid #eee";
           y.align = pal;
           y.appendChild(ai);
@@ -202,8 +259,6 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
         }
       };
 
-
-
 /*
       image.onclick = function() {
         if (image.height === 250) {
@@ -219,16 +274,50 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     });
   };
 
+  function ruReady(keyname) {
+    var allhsh = document.getElementById('totalHashs');
+    var subbtn = document.getElementById('BlockChainIt');
+    var allpic = document.getElementById('totalPics').value;
+    console.log("inside ruReady ... keyname = " + keyname);
+    var v = parseInt(allpic) + 1; 
+
+    allhsh.value++;
+    console.log("allhsh: " + allhsh.value);
+    console.log("allpic+1: " + v);
+    if (allhsh.value == v) { 
+      subbtn.disabled = false;
+    }
+  }
+
   window.saveImageOnIPFS = function() {
     ipfs.setProvider({host: 'localhost', port: '5001'});
+
+    var article = document.getElementById('thisval').value;
+    var kvform = document.forms.namedItem('newkv');
+
+    ipfs.add(article, (err, hash) => 
+    {
+      if (err) throw(err);
+      var inputa = document.createElement('input');
+      inputa.name = "valstr";
+      inputa.id = "valstr";
+      inputa.size = 96;
+      inputa.onchange = ruReady('valstr');
+      inputa.value = hash;
+      kvform.appendChild(inputa);
+      console.log(hash);
+    });
+
     var total = document.getElementById('totalPics').value;
 
     for (var i=1; i<=total; i++) {
       console.log("img" + i + ":"); var pn = "img" + i;
       var dataURL = document.getElementById(pn).value;
+      var inputp = document.getElementById('ipfs-img'+i);
       ipfs.add(dataURL, (err,hash) => 
       {
         if (err) throw(err);
+        inputp.value = hash;
         console.log(hash);
       });
     }
