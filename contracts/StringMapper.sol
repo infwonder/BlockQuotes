@@ -16,10 +16,8 @@ contract StringMapper {
       uint datemark;
       address poster;
       uint piccount;
-      uint extlinks;
       bytes32 mainaddr; 
-      mapping(uint => bytes32) ipfspics; 
-      mapping(uint => bytes32) ipfslink;
+      mapping(uint => string) ipfspics; 
     }
 
     mapping(uint => string) listum; // for looping list
@@ -84,17 +82,26 @@ contract StringMapper {
         }
     }
 
-    function addKeyValue(string key, string qmh) payable returns(bool){
-        if (bytes(key).length == 0 || bytes(qmh).length == 0) throw;
+    function addKeyValue(string title, string mainhash, string mediahash, uint mediacount) payable returns(bool){
+        if (bytes(title).length == 0 || bytes(mainhash).length == 0 || bytes(mediahash).length == 0 || mediacount < 0) throw;
 
-        bytes32 hash = sha3(key);
+        bytes32 hash = sha3(title);
         if(bytes(map[hash].title).length != 0) throw;
         itemcount++;
 
-        map[hash] = ipfsdata(itemcount, key, qmh, now, msg.sender, 0, 0, 0);
+        map[hash] = ipfsdata(itemcount, title, mainhash, now, msg.sender, mediacount, hash);
+
+        // split mediahash into ipfspics mapping
+        var media  = mediahash.toSlice();
+        var delim  = ','.toSlice();
+        var mcount = media.count(delim)+1;
+    
+        for(uint i = 1; i <= mcount; i++) {
+          map[hash].ipfspics[i] = media.split(delim).toString();
+        }
 
         // update data
-        listum[itemcount] = key;
+        listum[itemcount] = title;
         replies[hash] = associate(0);
 
         return true;
@@ -165,11 +172,19 @@ contract StringMapper {
 
     function doSha3( string testingString ) constant returns (bytes32) { return sha3( testingString ); }
 
-    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title){
+    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title, bytes32[2][] pichashs){
         date = map[hash].datemark;
         author = map[hash].poster;
         value = map[hash].qmhash;
         title = listum[map[hash].postid];
+
+        uint mcount = map[hash].piccount;
+        pichashs = new bytes32[2][](mcount);
+
+        for (uint i = 1; i <= mcount; i++) {
+          pichashs[i-1][0] = stringToBytes32s(map[hash].ipfspics[i], 32);
+          pichashs[i-1][1] = stringToBytes32s(map[hash].ipfspics[i], 64);
+        }
     }
 
     function getValue(string key) constant returns(string){
