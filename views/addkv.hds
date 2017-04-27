@@ -32,9 +32,6 @@
         <td align="center" colspan="2"><input id="imgkey" size=64></td>
         <td align="left" colspan="2"><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
       </tr>
-      <tr>
-        <td id="dataCell" colspan="4"></td>
-      </tr>
       <tr style="display:none;">
         <td colspan="2" style="block">
         <td align="left"><button onclick="loadImage()">Preview & Encode</button></td>
@@ -44,10 +41,11 @@
         <td align="left" colspan="3"><input type="file" id="fileToLoad" onchange="loadImage()"/></td>
         <td align="right" style="display:none"><input id="totalPics" size=6 name="total" value=0 /> image(s) loaded</td>
       </tr>
-      <tr>
-        <td colspan="3" align="right"><br><button onclick="saveImageOnIPFS()">Upload to IPFS</button></td>
-      </tr>
-  </table>
+</table>
+<table id="dataCell">
+</table>
+<br>
+<button onclick="saveImageOnIPFS()">Upload to IPFS</button>
 </div>
 
 <hr>
@@ -96,8 +94,11 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     input.id = key;
     input.className = 'durl';
     input.value = value;
-    var row = document.getElementById("dataCell");
-    row.appendChild(input);
+    var tbl = document.getElementById("dataCell");
+    var row = tbl.insertRow(-1);
+    row.id  = 'holder-' + fn;
+    var col = row.insertCell(-1);
+    col.appendChild(input);
 
     // preparing input for newkv form (no value yet)
     var inputp = document.createElement('input');
@@ -126,6 +127,8 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
       var r = document.getElementById('tb-row-'+ fn);
       r.parentNode.removeChild(r);
       this.parentNode.removeChild(this);
+      var h = document.getElementById('holder-'+ fn);
+      h.parentNode.removeChild(h);
       if (picn.value > 0) { 
         picn.value--;
         if (picn.value == 0) {
@@ -135,9 +138,9 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
         } 
       }
       if (thsh.value > 0) thsh.value--;
-    }
+    };
    btnp.innerHTML = 'delete ' + fn;
-   row.appendChild(btnp);
+   col.appendChild(btnp);
   }
 
   window.loadImage = function() {
