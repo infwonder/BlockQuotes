@@ -51,10 +51,14 @@
 </div>
 
 <hr>
+<br>
   <div align="center" class="container">
     <form role="form" action="/addkey?form='newkv'" name="newkv" id="newkv" method="POST">
+      <div id="formdata" align="center">
       <input id="totalHashs" name="totalHashs" value=0 style="display:none" />
-      <p align="center"><button id="BlockChainIt" type="submit" disabled=true>Submit the following IPFS hash(s)</button></p>
+      </div>
+      <br><br>
+      <button id="BlockChainIt" type="submit" disabled=true>Submit the following IPFS hash(s)</button>
     </form>
   </div>
 <hr>
@@ -77,7 +81,8 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
 <script>
   function addHidden(value, fn) {
     // Create a hidden input element:
-    var kvform = document.forms.namedItem('newkv');
+    //var kvform = document.forms.namedItem('newkv');
+    var formdata = document.getElementById('formdata');
     var input = document.createElement('input');
     var picno = document.getElementById('totalPics');
     var thash = document.getElementById('totalHashs');
@@ -109,7 +114,8 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     inputp.style = 'display:none';
     inputp.onchange = ruReady(inputp.name);
 
-    kvform.appendChild(inputp);
+    //kvform.appendChild(inputp);
+    formdata.appendChild(inputp);
 
     var btnp = document.createElement('button');
     btnp.type = 'button';
@@ -301,7 +307,18 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     ipfs.setProvider({host: 'localhost', port: '5001'});
 
     var article = document.getElementById('thisval').value;
-    var kvform = document.forms.namedItem('newkv');
+    var title   = document.getElementById('thiskey').value; 
+
+    if (!title || !article) throw('Error: title or text content is not set ...');
+
+    var inputt  = document.createElement('input');
+    inputt.name = "keystr";
+    inputt.style = 'display:none';
+    inputt.value = title;
+    inputt.readOnly = true;
+
+    //var kvform = document.forms.namedItem('newkv');
+    var formdata = document.getElementById('formdata');
 
     ipfs.add(article, (err, hash) => 
     {
@@ -312,9 +329,12 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
       inputa.size = 96;
       inputa.onchange = ruReady('valstr');
       inputa.value = hash;
-      kvform.appendChild(inputa);
+      //kvform.appendChild(inputa);
+      formdata.appendChild(inputa);
       console.log(hash);
     });
+
+    formdata.appendChild(inputt);
 
     var total = document.getElementById('totalPics').value;
     var allimgs = document.getElementsByClassName('durl');
@@ -329,7 +349,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
           var h = document.getElementById('ipfs-' + pn);
           h.value = hash;
           h.style = '';
-          h.readonly = 'readonly';
+          h.readOnly = true;
           console.log(hash); 
         }
       });
