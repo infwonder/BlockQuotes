@@ -329,6 +329,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
           var h = document.getElementById('ipfs-' + pn);
           h.value = hash;
           h.style = '';
+          h.readonly = 'readonly';
           console.log(hash); 
         }
       });
