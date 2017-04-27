@@ -264,6 +264,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     response.render('addkv', {key: ''});
   });
 
+/*
   app.post('/addkey', function(request, response) 
   {
     var thiskey = request.body.keystr;
@@ -288,6 +289,16 @@ StrMapCtr.deployed().then( (StrMapIns) =>
       .catch((err) => { catchedError(response, err); });
 
     });
+  });
+*/
+
+  app.post('/addkey', function(request, response) 
+  {
+    console.log(JSON.stringify(request.body, null, 2));
+    var thiskey = request.body.keystr;
+    var texthash = request.body.valstr;
+    
+    Object.keys(request.body).map( (i) => {});
   });
 
 // About page

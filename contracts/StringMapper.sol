@@ -1,5 +1,9 @@
 pragma solidity ^0.4.6;
+
+import "./strings.sol";
+
 contract StringMapper {
+    using strings for *;
 
     uint public itemcount;
     uint itemdeleted;
@@ -66,6 +70,17 @@ contract StringMapper {
         for (uint i = 1; i <= parts; i++) {
           uint N = i * 32;
           result[i-1] = stringToBytes32s(source, N);
+        }
+    }
+
+    function stringToArray(string spaced) constant returns (bytes32[1][] result) {
+        var spaces = spaced.toSlice();
+        var delim  = ' '.toSlice();
+        var items  = spaces.count(delim);
+        result = new bytes32[1][](items+1);
+
+        for(uint i = 0; i < items+1; i++) {
+            result[i][0] = stringToBytes32(spaces.split(delim).toString());
         }
     }
 
