@@ -152,25 +152,42 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     {
       console.log(JSON.stringify(results, null, 2));
       var d = new Date(0);
-      var ipfshash = 'Qm' + results[1]; console.log("ipfs: " + ipfshash);
+      var ipfshash = results[1]; console.log("ipfs: " + ipfshash);
       d.setUTCSeconds(web3.toDecimal(web3.toBigNumber(results[0])));
+
+      // loading other media ipfs hashs, if any.
+      var ipfslist = [];
+      if (results[4] > 1) {
+        var imhashs = results[5];
+        imhashs.map((p) => 
+        {
+          ipfslist.push( {'ihash': web3.toUtf8(p[0]) + web3.toUtf8(p[1])} );
+        });
+      }
+
       ipfs.cat(ipfshash, (err, buf) => 
       {
+        if (err) throw(err);
+
         var thisval = buf.toString(); var aaa = [];
-        thisval.split(/\n\r|\n|\r/).map((i) => { 
+        thisval.split(/\n\r|\n|\r/).map((i) => {
+        //  console.log("get i = " + i + "|"); 
           if (!i) i = '\\n';
           i = i.replaceAll("'", "\\'");
           i = i.replaceAll(";", "\\;");
           aaa.push(i); 
         });
-        aaa = aaa.join('');
+        aaa = aaa.join('\\n');
+        // console.log(aaa);
          
         StrMapIns.getReplyCount(key).then((c) => 
         {
           c = web3.toDecimal(c);
   
-          if (c == 0) { 
-            response.render('post', {title: results[3], hash: key, comment: false, date: d, author: results[2], value: aaa});
+          if (c == 0) {
+            var hdbobj = {title: results[3], hash: key, comment: false, date: d, author: results[2], value: aaa};
+            if (ipfslist) hdbobj['ipfslist'] = ipfslist;
+            response.render('post', hdbobj);
           } else {
   
             var start = (thispage-1)*16;
@@ -199,8 +216,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
               return a;
             }).then((array) => 
               {
-                response.render('post', 
-                  { 
+                var hdbobj = { 
                     rvlist: array, 
                     page: thispage, 
                     firstpage: firstpage, 
@@ -210,8 +226,12 @@ StrMapCtr.deployed().then( (StrMapIns) =>
                     author: results[2], 
                     value: aaa, 
                     hash: key,
-                    title: results[3]
-                  });
+                    title: results[3],
+                };
+
+                if (ipfslist) hdbobj['ipfslist'] = ipfslist;                
+
+                response.render('post', hdbobj);
             }); 
          }
        });
@@ -297,7 +317,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     console.log(JSON.stringify(request.body, null, 2));
     var thiskey = request.body.keystr;
     var texthash = request.body.valstr;
-    var picount = request.body.totalHashs - 1; 
+    var picount = request.body.totalHashs; 
     var phlist = [];
 
     Object.keys(request.body).map( (i) => 
@@ -309,7 +329,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 
     var pichashs = phlist.join(',');
 
-    //console.log(pichashs);
+    console.log(pichashs);
 
     StrMapIns.addKeyValue(thiskey, texthash, pichashs, picount, {from: web3.eth.accounts[1], gas: 600000}).then( (result) => 
     {

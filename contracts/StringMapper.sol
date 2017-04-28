@@ -83,7 +83,7 @@ contract StringMapper {
     }
 
     function addKeyValue(string title, string mainhash, string mediahash, uint mediacount) payable returns(bool){
-        if (bytes(title).length == 0 || bytes(mainhash).length == 0 || bytes(mediahash).length == 0 || mediacount < 0) throw;
+        if (bytes(title).length == 0 || bytes(mainhash).length == 0 || mediacount < 1) throw;
 
         bytes32 hash = sha3(title);
         if(bytes(map[hash].title).length != 0) throw;
@@ -91,13 +91,15 @@ contract StringMapper {
 
         map[hash] = ipfsdata(itemcount, title, mainhash, now, msg.sender, mediacount, hash);
 
-        // split mediahash into ipfspics mapping
-        var media  = mediahash.toSlice();
-        var delim  = ','.toSlice();
-        var mcount = media.count(delim)+1;
+        if (mediacount > 1) {
+          // split mediahash into ipfspics mapping
+          var media  = mediahash.toSlice();
+          var delim  = ','.toSlice();
+          var mcount = media.count(delim)+1;
     
-        for(uint i = 1; i <= mcount; i++) {
-          map[hash].ipfspics[i] = media.split(delim).toString();
+          for(uint i = 1; i <= mcount; i++) {
+            map[hash].ipfspics[i] = media.split(delim).toString();
+          }
         }
 
         // update data
@@ -172,19 +174,20 @@ contract StringMapper {
 
     function doSha3( string testingString ) constant returns (bytes32) { return sha3( testingString ); }
 
-    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title, bytes32[2][] pichashs){
+    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title, uint mcount, bytes32[2][] pichashs){
         date = map[hash].datemark;
         author = map[hash].poster;
         value = map[hash].qmhash;
         title = listum[map[hash].postid];
+        mcount = map[hash].piccount;
 
-        uint mcount = map[hash].piccount;
-        pichashs = new bytes32[2][](mcount);
+        pichashs = new bytes32[2][](mcount-1);
 
-        for (uint i = 1; i <= mcount; i++) {
+        for (uint i = 1; i <=mcount-1; i++) {
           pichashs[i-1][0] = stringToBytes32s(map[hash].ipfspics[i], 32);
           pichashs[i-1][1] = stringToBytes32s(map[hash].ipfspics[i], 64);
         }
+
     }
 
     function getValue(string key) constant returns(string){

@@ -181,8 +181,6 @@
         }
       };
 
-
-
 /*
       image.onclick = function() {
         if (image.height === 250) {

@@ -5,10 +5,83 @@
     </div>
   </div>
 
+  <script src="/ipfs.min.js"></script>
+ 
+{{#if ipfslist}} 
+  <div id="picFrame" class="jumbotron" style="background-color: #fff">
+  <div class="jumboframe-wrapper">
+  <div class="jumboframe">
+  <table id="imgTBL" class="picture-frame" >
+    <tr></tr>
+  </table>
+  </div>
+  </div>
+  </div>
+{{/if}}
+
   <div class="container">
     <h3 align="center">By {{author}}</h3>
     <h4 align="center">On {{date}}</h4>
   </div>
+
+<script>
+  window.displayImageOnIPFS = function(ipfshash) 
+  {
+    ipfs.setProvider({host: 'localhost', port: '5001'});
+    console.log("Loading IPFS Hash: " + ipfshash);
+    ipfs.catText(ipfshash, function(err, dataURL) 
+    {
+      if(err) throw(err);
+
+      var byteString = atob(dataURL.split(',')[1]);
+      var mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+
+      // write the bytes of the string to an ArrayBuffer
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+
+      // write the ArrayBuffer to a blob, and you're done
+      var blob = new Blob([ia], {type: mimeString});
+
+      var ai = document.createElement('a');
+      ai.href = URL.createObjectURL(blob);
+
+      var image = new Image();
+      image.src = dataURL;
+      image.className = "hover-shadow";
+      image.id = ipfshash;
+
+      image.onload = function () {
+        image.width = this.width/this.height*500;
+        image.height = 500;
+        ai.appendChild(this);
+
+        var tb = document.getElementById("imgTBL");
+        var row = tb.rows[tb.rows.length-1];
+
+        if (row.cells.length < 3) {
+          var x = row.insertCell(0);
+          x.style.border = "3px solid #eee";
+          x.appendChild(ai);
+        } else {
+          var x = tb.insertRow(-1);
+          var y = x.insertCell(0);
+          y.style.border = "3px solid #eee";
+          y.appendChild(ai);
+        }
+      };
+    });
+  };
+</script>
+
+<script>
+{{#ipfslist}}
+displayImageOnIPFS('{{ihash}}')
+{{/ipfslist}}
+</script>
 
 <br>
 
