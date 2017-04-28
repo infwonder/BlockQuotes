@@ -1,15 +1,20 @@
   <div class="jumbotron">
     <div class="container">
-      <br>
-      <h1 align="center">Reply to post:</h1>
-      <h2 align="center">{{hash}}</h2><br>
-      <p><h3 align="center">{{op}}</h3></p>
+      <p><h1 align="center">Tip to Comment </h1></p>
     </div>
   </div>
   <div class="container">
+      <h2 align="center">{{title}}</h2><br>
     <form role="form" action="/reply/{{hash}}" name="newrc" id="newrc" method="POST">
       <div class="row" align=center>
-        <div class="col-md-12" align="left"><label for="thisrc">Your comment:</label>
+        <div class="col-md-12" align="center">
+        <label for="sendto">Send &nbsp</label> 
+        <input id="amount" name="amount" size=4 value="0.10" style="font-size:1.2em; font-family:monospace;" /><label for="amount">&nbsp Ether</label>
+        <label for="sendto">&nbsp to Address: &nbsp</label>
+          <span></span><input id="sendto" name="senddo" size=44 readonly style="font-size:1.2em; font-family:monospace;" value="{{author}}" /><span></span>
+        </div>
+
+        <div class="col-md-12" align="left"><label for="thisrc">Your comment: (max char.: 128)</label>
         <textarea type="text" id="thisrc" name="thisrc" required rows="16" cols="144" maxlength=128 form="newrc" placeholder=" e.g., thank you!"></textarea></div>
         <div class="col-md-12"><br><br><button type="submit">Send</button></div>
       </div>

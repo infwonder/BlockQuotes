@@ -244,7 +244,14 @@ StrMapCtr.deployed().then( (StrMapIns) =>
   app.get('/reply/:phash', function(request, response) 
   {
     var hash = request.params.phash; // need validation!
-    response.render('reply', {'hash': hash});
+    StrMapIns.getValueByHash(hash).then((results) => 
+    {
+      var sendto = results[2].toAddress('wallet');
+      var title  = results[3];
+      response.render('reply', {'hash': hash, 'author': sendto, 'title': title });
+    }).
+    catch((err) => { catchedError(response, err) });
+
   });
 
   app.post('/reply/:phash', function(request, response) 
