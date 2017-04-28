@@ -297,8 +297,31 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     console.log(JSON.stringify(request.body, null, 2));
     var thiskey = request.body.keystr;
     var texthash = request.body.valstr;
-    
-    Object.keys(request.body).map( (i) => {});
+    var picount = request.body.totalHashs - 1; 
+    var phlist = [];
+
+    Object.keys(request.body).map( (i) => 
+    { 
+       if (i.match(/^ipfs-img/)) {
+         phlist.push(request.body[i]);
+       }
+    });
+
+    var pichashs = phlist.join(',');
+
+    //console.log(pichashs);
+
+    StrMapIns.addKeyValue(thiskey, texthash, pichashs, picount, {from: web3.eth.accounts[1], gas: 600000}).then( (result) => 
+    {
+      if (result.receipt.blockNumber === null) {
+        var err = 'Transaction ' + result.tx + ' failed ...';
+        throw(err);
+      }
+        
+      var array = [{key: thiskey, hash: web3.sha3(thiskey), value: texthash}]; // for speed sake, but probably not right...
+      response.render('result', {kvlist: array});
+    })
+    .catch((err) => { catchedError(response, err); });
   });
 
 // About page
