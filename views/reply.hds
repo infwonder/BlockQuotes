@@ -14,8 +14,9 @@
           <span></span><input id="sendto" name="senddo" size=44 readonly style="font-size:1.2em; font-family:monospace;" value="{{author}}" /><span></span>
         </div>
 
-        <div class="col-md-12" align="left"><label for="thisrc">Your comment: (max char.: 128)</label>
-        <textarea type="text" id="thisrc" name="thisrc" required rows="1" cols="144" maxlength=128 form="newrc" placeholder=" e.g., thank you!"></textarea></div>
+        <div class="col-md-12" align="left"><label align="left" for="thisrc">Your comment: (max char.: 128)</label>
+        <textarea align="center" type="text" id="thisrc" name="thisrc" required rows="2" cols="144" maxlength=128 form="newrc" placeholder=" e.g., thank you!"></textarea>
+        </div>
         <div class="col-md-12"><br><br><button type="submit">Send</button></div>
       </div>
     </form>
