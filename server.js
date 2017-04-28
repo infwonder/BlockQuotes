@@ -259,7 +259,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     var hash = request.params.phash; // need validation!
     var comment = request.body.thisrc;
 
-    StrMapIns.addReply(hash, comment, {from: web3.eth.accounts[1], gas: 400000}).then((result) => 
+    StrMapIns.addReply(hash, comment, {from: web3.eth.accounts[1], gas: 600000}).then((result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';
