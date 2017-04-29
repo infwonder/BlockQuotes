@@ -266,13 +266,24 @@ StrMapCtr.deployed().then( (StrMapIns) =>
   app.get('/reply/:phash', function(request, response) 
   {
     var hash = request.params.phash; // need validation!
-    StrMapIns.getValueByHash(hash).then((results) => 
+
+    StrMapIns.checkMembership(web3.eth.accounts[0]).then((result) =>
     {
-      var sendto = results[2].toAddress('wallet');
-      var title  = results[3];
-      response.render('reply', {'hash': hash, 'author': sendto, 'title': title });
-    }).
-    catch((err) => { catchedError(response, err) });
+      console.log("checking ... ");
+      if (result[0] === true) {
+        StrMapIns.getValueByHash(hash).then((results) => 
+        {
+          var sendto = results[2].toAddress('wallet');
+          var title  = results[3];
+          response.render('reply', {'hash': hash, 'author': sendto, 'title': title });
+        }).catch((err) => { catchedError(response, err) });
+      } else {
+        response.render('member');
+      }
+    }).catch((err) => { catchedError(response, err); });
+
+
+
 
   });
 
