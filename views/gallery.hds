@@ -1,35 +1,13 @@
+  <div class="jumbotron">
+    <div class="container">
+      <h1 align="center" id="pTitle">Adding New Key-Value Pair:</h1>
+    </div>
+  </div>
+
+<script src="/marked.js"></script>
 <script src="/ipfs.min.js"></script>
-<div class="container">
-<table align="center">
-      <tr>
-        <td align="center" colspan="2"><input id="imgkey" size=64></td>
-        <td align="left" colspan="2"><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
-      </tr>
-      <tr>
-        <td id="dataCell" colspan="4"></td>
-      </tr>
-      <tr>
-        <td align="center" colspan="1">Select a File to Load:</td>
-        <td align="right" colspan="3"><input type="file" id="fileToLoad" /></td>
-      </tr>
-      <tr>
-        <td colspan="2" style="block">
-        <td align="left"><button onclick="saveImageOnIPFS()">Upload to IPFS</button></td>
-      </tr>
-      <tr>
-        <td colspan="2" style="block">
-        <td align="left"><button onclick="loadImage()">Preview & Encode</button></td>
-      </tr>
-      <tr>
-        <td colspan="2" style="block">
-        <td align="left"><input id="totalPics" name="total" value=0 /></td>
-      </tr>
- </table>
-</div>
 
-<br><br><br><br>
-
-<div class="jumbotron">
+<div id="picFrame" class="jumbotron" style="display:none;">
 <div class="jumboframe-wrapper">
 <div class="jumboframe">
 <table id="imgPre" class="picture-frame" >
@@ -39,31 +17,238 @@
 </div>
 </div>
 
-<br><br><br><br>
+<br>
 
-<div class="jumbotron">
-<table id="imgTBL" align="center" class="picture-frame" >
+<div class="container" id="content" style="margin: 0 auto; white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
+
+<br><br>
+
+<div id="audFrame" class="container" style="display:none">
+<table id="audPre" class="picture-frame" >
   <tr></tr>
 </table>
 </div>
 
+<hr>
+
+<div class="container" align="center" id="editor">
+      <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
+      <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>
+      <div class="col-md-12" align="left"><label for="thisval">The new value:</label>
+      <textarea type="text" id="thisval" style="white-space:pre" required rows="16" cols="144" placeholder=" e.g., my new value"></textarea></div>
+      <br>
+  <table align="center">
+      <tr style="display:none">
+        <td align="center" colspan="2"><input id="imgkey" size=64></td>
+        <td align="left" colspan="2"><button onclick="displayImageOnIPFS()">Load from IPFS</button></td>
+      </tr>
+      <tr style="display:none;">
+        <td colspan="2" style="block">
+        <td align="left"><button onclick="loadImage()">Preview & Encode</button></td>
+      </tr>
+      <tr>
+        <td align="left">Select a File to Load:</td>
+        <td align="left" colspan="3"><input type="file" id="fileToLoad" onchange="loadImage()"/></td>
+        <td align="right" style="display:none"><input id="totalMedia" size=6 name="totalm" value=0 /> media loaded</td>
+        <td align="right" style="display:none"><input id="totalPics" size=6 name="totalp" value=0 /> image(s) loaded</td>
+        <td align="right" style="display:none"><input id="totalAuds" size=6 name="totala" value=0 /> audio(s) loaded</td>
+      </tr>
+</table>
+<br>
+
+<table id="dataCell" align="center">
+</table>
+<br><br>
+<button align="center" onclick="saveImageOnIPFS()">Upload to IPFS</button>
+</div>
+
+<hr>
+<br>
+  <div align="center" class="container">
+    <form role="form" action="/addkey?form='newkv'" name="newkv" id="newkv" method="POST">
+      <div id="formdata" align="center">
+      <input id="totalHashs" name="totalHashs" value=0 style="display:none" />
+      </div>
+      <br><br>
+      <button id="BlockChainIt" type="submit" disabled=true>Submit the following IPFS hash(s)</button>
+    </form>
+  </div>
+<hr>
+
+
 <script>
-  function addHidden(value) {
-    // Create a hidden input element, and append it to the form:
+var wptitle = document.getElementById('thiskey');
+wptitle.onkeyup = wptitle.onkeypress = function(){
+    document.getElementById('pTitle').innerHTML = this.value;
+}
+</script>
+
+<script>
+var wpcontent = document.getElementById('thisval');
+wpcontent.onkeyup = wpcontent.onkeypress = function(){
+  document.getElementById('content').innerHTML = marked(this.value, {sanitize: true});
+}
+</script>
+
+<script>
+  function addHiddenAud(value, fn) {
+    // Create a hidden input element:
+    //var kvform = document.forms.namedItem('newkv');
+    var formdata = document.getElementById('formdata');
+    var input = document.createElement('input');
+    var audno = document.getElementById('totalAuds');
+    var medno = document.getElementById('totalMedia');
+    var thash = document.getElementById('totalHashs');
+    var count = audno.value; count++;
+    var countm = medno.value; countm++;
+    audno.value = count;
+    medno.value = countm;
+
+    console.log("Now we have " + count + " audio(s) in total...");
+    console.log("Now we have " + countm + " media in total...");
+
+    var audframe = document.getElementById('audFrame');
+    if (count != 0) audframe.style = 'display:all; background-color: #fff' ;
+
+    var key   = 'aud' + count;
+
+    input.type = 'hidden';
+    input.name = key; // name-as-seen-at-the-server
+    input.id = key;
+    input.className = 'durl';
+    input.value = value;
+    var tbl = document.getElementById("dataCell");
+    var row = tbl.insertRow(-1);
+    row.id  = 'holder-' + fn;
+    var col = row.insertCell(-1);
+    col.appendChild(input);
+
+    // preparing input for newkv form (no value yet)
+    var inputp = document.createElement('input');
+    inputp.name = 'ipfs-' + key;
+    inputp.id = 'ipfs-' + key;
+    inputp.size = 96;
+    inputp.style = 'display:none';
+    inputp.onchange = ruReady(inputp.name);
+
+    //kvform.appendChild(inputp);
+    formdata.appendChild(inputp);
+
+    var btnp = document.createElement('button');
+    btnp.type = 'button';
+    btnp.style.width = '400px';
+    btnp.name = 'reset' + 'ipfs-' + key;
+    btnp.id = 'reset' + 'ipfs-' + key;
+    btnp.onclick = function() {
+      var picn = document.getElementById('totalAuds');
+      var medn = document.getElementById('totalMedia');
+      var thsh = document.getElementById('totalHashs');
+      var i = document.getElementById(this.name.substr(5));
+      i.parentNode.removeChild(i); console.log(this.id);
+      var k = document.getElementById(this.name.substr(10));
+      k.parentNode.removeChild(k);
+      var t = document.getElementById('aplayer-'+ fn);
+      t.parentNode.removeChild(t);
+      var r = document.getElementById('tb-row-'+ fn);
+      r.parentNode.removeChild(r);
+      this.parentNode.removeChild(this);
+      var h = document.getElementById('holder-'+ fn);
+      h.parentNode.removeChild(h);
+      if (picn.value > 0) { 
+        picn.value--;
+        if (picn.value == 0) {
+          console.log("Audn is now 0");
+          var pframe = document.getElementById('audFrame');
+          pframe.style = "display:none"; 
+        } 
+      }
+      if (thsh.value > 0) thsh.value--;
+      if (medn.value > 0) medn.value--;
+    };
+   btnp.innerHTML = 'delete ' + fn;
+   col.appendChild(btnp);
+  }
+
+
+  function addHiddenImg(value, fn) {
+    // Create a hidden input element:
+    //var kvform = document.forms.namedItem('newkv');
+    var formdata = document.getElementById('formdata');
     var input = document.createElement('input');
     var picno = document.getElementById('totalPics');
+    var medno = document.getElementById('totalMedia');
+    var thash = document.getElementById('totalHashs');
+
     var count = picno.value; count++;
+    var countm = medno.value; countm++;
     picno.value = count;
+    medno.value = countm;
+
     console.log("Now we have " + count + " picture(s) in total...");
+    console.log("Now we have " + countm + " media in total...");
+
+    var picframe = document.getElementById('picFrame');
+    if (count != 0) picframe.style = 'display:all; background-color: #fff' ;
 
     var key   = 'img' + count;
 
     input.type = 'hidden';
     input.name = key; // name-as-seen-at-the-server
     input.id = key;
+    input.className = 'durl';
     input.value = value;
-    var row = document.getElementById("dataCell");
-    row.appendChild(input);
+    var tbl = document.getElementById("dataCell");
+    var row = tbl.insertRow(-1);
+    row.id  = 'holder-' + fn;
+    var col = row.insertCell(-1);
+    col.appendChild(input);
+
+    // preparing input for newkv form (no value yet)
+    var inputp = document.createElement('input');
+    inputp.name = 'ipfs-' + key;
+    inputp.id = 'ipfs-' + key;
+    inputp.size = 96;
+    inputp.style = 'display:none';
+    inputp.onchange = ruReady(inputp.name);
+
+    //kvform.appendChild(inputp);
+    formdata.appendChild(inputp);
+
+    var btnp = document.createElement('button');
+    btnp.type = 'button';
+    btnp.style.width = '400px';
+    btnp.name = 'reset' + 'ipfs-' + key;
+    btnp.id = 'reset' + 'ipfs-' + key;
+    btnp.onclick = function() {
+      var picn = document.getElementById('totalPics');
+      var medi = document.getElementById('totalMedia');
+      var thsh = document.getElementById('totalHashs');
+      var i = document.getElementById(this.name.substr(5));
+      i.parentNode.removeChild(i); console.log(this.id);
+      var k = document.getElementById(this.name.substr(10));
+      k.parentNode.removeChild(k);
+      var t = document.getElementById('thumb-'+ fn);
+      t.parentNode.removeChild(t);
+      var a = document.getElementById('blob-'+ fn);
+      a.parentNode.removeChild(a);
+      var r = document.getElementById('tb-row-'+ fn);
+      r.parentNode.removeChild(r);
+      this.parentNode.removeChild(this);
+      var h = document.getElementById('holder-'+ fn);
+      h.parentNode.removeChild(h);
+      if (picn.value > 0) { 
+        picn.value--;
+        if (picn.value == 0) {
+          console.log("Picn is now 0");
+          var pframe = document.getElementById('picFrame');
+          pframe.style = "display:none"; 
+        } 
+      }
+      if (thsh.value > 0) thsh.value--;
+      if (medi.value > 0) medi.value--;
+    };
+   btnp.innerHTML = 'delete ' + fn;
+   col.appendChild(btnp);
   }
 
   window.loadImage = function() {
@@ -78,13 +263,10 @@
       var byteString = atob(dataURL.split(',')[1]);
       contentType = dataURL.split(",")[0].split(":")[1].split(";")[0];
 
-      console.log(contentType);
-
-
-     if (contentType.match(/audio\/.*/)) {
+      if ( contentType.match(/audio\/.*/) ) {
         console.log("loading ...");
         var audio = document.createElement('AUDIO');
-  
+
         // write the bytes of the string to an ArrayBuffer
         var ab = new ArrayBuffer(byteString.length);
         var ia = new Uint8Array(ab);
@@ -95,23 +277,28 @@
         var blob = new Blob([ia], {type: contentType});
         audio.src = URL.createObjectURL(blob);
         audio.load();
-  
+
         if (!audio.canPlayType("audio/mpeg")) {
           console.log("cannot play mp3! use ogg instead");
         }
 
+        audio.id = "aplayer-" + fname;
         audio.setAttribute("controls", "controls");
+        addHiddenAud(dataURL, fname);
 
-        var tb = document.getElementById("imgPre");
+        var tb = document.getElementById("audPre");
         var row = tb.rows[tb.rows.length-1];
+
         var x = row.insertCell(-1);
         x.appendChild(audio);
+        x.id = 'tb-row-' + fname;
+        x.style.border = "3px solid #eee";
         x.align = 'center';
-      
-     } else if (contentType.match(/image\/.*/)) {
+      } else if ( contentType.match(/image\/.*/) ) {
         var image = new Image();
         image.src = dataURL;
         image.className = "hover-shadow";
+        image.id = 'thumb-' + fname;
   
         // write the bytes of the string to an ArrayBuffer
         var ab = new ArrayBuffer(byteString.length);
@@ -125,13 +312,12 @@
   
         var ai = document.createElement('a');
         ai.href = URL.createObjectURL(blob);
+        ai.id = 'blob-' + fname;
   
         image.onload = function() {
-          image.height = 973/this.width*this.height;
-          image.width  = 973;
-//        image.width = this.width/this.height*500;
-//        image.height = 500;
-          addHidden(dataURL);
+          image.width = this.width/this.height*500;
+          image.height = 500;
+          addHiddenImg(dataURL, fname);
   
           console.log("Image type: " + contentType);
           console.log("Image width: " + this.width);
@@ -141,19 +327,23 @@
           var tb = document.getElementById("imgPre");
           var row = tb.rows[tb.rows.length-1];
   
-          var pal = '';
+          var pal = 'center';
+  /*
           if (row.cells.length % 3 === 0) pal = 'right';
           if (row.cells.length % 3 === 1) pal = 'center';
           if (row.cells.length % 3 === 2) pal = 'left';
+  */
   
-          if (row.cells.length < 30) {
+          if (row.cells.length < 3) {
             var x = row.insertCell(-1);
+            x.id = 'tb-row-' + fname;
             x.style.border = "3px solid #eee";
             x.align = pal;
             x.appendChild(ai);
           } else {
             var x = tb.insertRow(-1);
             var y = x.insertCell(0);
+            y.id = 'tb-row-' + fname;
             y.style.border = "3px solid #eee";
             y.align = pal;
             y.appendChild(ai);
@@ -195,21 +385,25 @@
       image.id = ipfshash;
 
       image.onload = function () {
-        image.width = this.width/this.height*250;
-        image.height = 250;
+        image.width = this.width/this.height*500;
+        image.height = 500;
         ai.appendChild(this);
 
         var tb = document.getElementById("imgTBL");
         var row = tb.rows[tb.rows.length-1];
 
         if (row.cells.length < 3) {
-          var x = row.insertCell(0);
-          x.style.border = "3px solid #eee";
+          var x = row.insertCell(-1);
+          x.id = 'tb-row-' + fname;
+          // x.style.border = "3px solid #eee";
+          x.align = 'center';
           x.appendChild(ai);
         } else {
           var x = tb.insertRow(-1);
           var y = x.insertCell(0);
-          y.style.border = "3px solid #eee";
+          y.id = 'tb-row-' + fname;
+          // y.style.border = "3px solid #eee";
+          y.align = 'center';
           y.appendChild(ai);
         }
       };
@@ -229,19 +423,78 @@
     });
   };
 
+  function ruReady(keyname) {
+    var allhsh = document.getElementById('totalHashs');
+    var subbtn = document.getElementById('BlockChainIt');
+    var allpic = document.getElementById('totalMedia').value;
+    console.log("inside ruReady ... keyname = " + keyname);
+    var v = parseInt(allpic) + 1; 
+
+    allhsh.value++;
+    console.log("allhsh: " + allhsh.value);
+    console.log("allpic+1: " + v);
+    if (allhsh.value == v) { 
+      subbtn.disabled = false;
+      document.getElementById('editor').style = "display:none";
+    }
+  }
+
   window.saveImageOnIPFS = function() {
     ipfs.setProvider({host: 'localhost', port: '5001'});
-    var total = document.getElementById('totalPics').value;
 
-    for (var i=1; i<=total; i++) {
-      console.log("img" + i + ":"); var pn = "img" + i;
-      var dataURL = document.getElementById(pn).value;
-      ipfs.add(dataURL, (err,hash) => 
+    var article = document.getElementById('thisval').value;
+    var title   = document.getElementById('thiskey').value; 
+
+    if (!title || !article) throw('Error: title or text content is not set ...');
+
+    var inputt  = document.createElement('input');
+    inputt.name = "keystr";
+    inputt.style = 'display:none';
+    inputt.value = title;
+    inputt.readOnly = true;
+
+    //var kvform = document.forms.namedItem('newkv');
+    var formdata = document.getElementById('formdata');
+
+    ipfs.add(article, (err, hash) => 
+    {
+      if (err) throw(err);
+      var inputa = document.createElement('input');
+      inputa.name = "valstr";
+      inputa.id = "valstr";
+      inputa.size = 96;
+      inputa.onchange = ruReady('valstr');
+      inputa.value = hash;
+      inputa.readOnly = true;
+      //kvform.appendChild(inputa);
+      formdata.appendChild(inputa);
+      console.log(hash);
+    });
+
+    formdata.appendChild(inputt);
+
+    var allimgs = document.getElementsByClassName('durl');
+
+    function updateHash(i) {
+      ipfs.add(allimgs[i].value, (err, hash) => 
       {
-        if (err) throw(err);
-        console.log(hash);
+        if (err) { 
+          throw(err);
+        } else {
+          var pn = allimgs[i].name;
+          var h = document.getElementById('ipfs-' + pn);
+          h.value = hash;
+          h.style = '';
+          h.readOnly = true;
+          console.log(hash); 
+        }
       });
     }
+
+    for (var i=0; i<allimgs.length; i++) {
+      updateHash(i);
+    } 
   };
 
 </script>
+

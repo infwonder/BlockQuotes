@@ -338,34 +338,6 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 
   });
 
-/*
-  app.post('/addkey', function(request, response) 
-  {
-    var thiskey = request.body.keystr;
-    var thisval = request.body.valstr;
-
-    // Store thisval on IPFS
-    ipfs.add(thisval, (err, hash) => {
-      if (err) throw(err);
-
-      var qmhash = hash.substr(2);   
- 
-      StrMapIns.addKeyValue(thiskey, qmhash, {from: web3.eth.accounts[1], gas: 400000}).then((result) => 
-      {
-        if (result.receipt.blockNumber === null) {
-          var err = 'Transaction ' + result.tx + ' failed ...';
-          throw(err);
-        }
-        
-        var array = [{key: thiskey, hash: web3.sha3(thiskey), value: hash}]; // for speed sake, but probably not right...
-        response.render('result', {kvlist: array});
-      })
-      .catch((err) => { catchedError(response, err); });
-
-    });
-  });
-*/
-
   app.post('/addkey', function(request, response) 
   {
     console.log(JSON.stringify(request.body, null, 2));
@@ -373,19 +345,24 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     var texthash = request.body.valstr;
     var picount = request.body.totalHashs; 
     var phlist = [];
+    var ahlist = [];
 
     Object.keys(request.body).map( (i) => 
     { 
        if (i.match(/^ipfs-img/)) {
          phlist.push(request.body[i]);
+       } else if (i.match(/^ipfs-aud/)) {
+         ahlist.push(request.body[i]);
        }
     });
 
     var pichashs = phlist.join(',');
+    var audhashs = phlist.join(',');
 
-    console.log(pichashs);
+    console.log("Images: " + pichashs);
+    console.log("Audio: " + audhashs);
 
-    StrMapIns.addKeyValue(thiskey, texthash, pichashs, picount, {from: web3.eth.accounts[0], gas: 600000}).then( (result) => 
+    StrMapIns.addKeyValue(thiskey, texthash, pichashs, audhashs, picount, {from: web3.eth.accounts[0], gas: 600000}).then( (result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';

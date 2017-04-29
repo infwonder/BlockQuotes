@@ -7,9 +7,7 @@ contract StringMapper {
 
     bool locked;
     uint public itemcount;
-    uint itemdeleted;
-    uint pagemax;
-    uint fee = 1 ether;
+    uint delete_head;
 
     struct ipfsdata {
       uint postid;
@@ -17,9 +15,8 @@ contract StringMapper {
       string qmhash;
       uint datemark;
       address poster;
-      uint piccount;
-      bytes32 mainaddr; 
-      mapping(uint => string) ipfspics; 
+      uint mediacount;
+      mapping(uint => string) ipfsmedia; 
     }
 
     mapping(uint => string) listum; // for looping list
@@ -44,7 +41,7 @@ contract StringMapper {
     }
 
     modifier minimalFee() {
-        if (msg.value < fee) throw;
+        if (msg.value < 3 ether) throw;
         _;
     }
 
@@ -53,10 +50,13 @@ contract StringMapper {
         _;
     }
 
+    modifier isAuthor(bytes32 hash) {
+        if (map[hash].poster == 0 || map[hash].poster != msg.sender) throw;
+        _;
+    }
+
     function StringMapper() payable { 
         itemcount = 0;
-        itemdeleted = 0;
-        pagemax = 32;
     }
 
     function stringToBytes32(string memory source) constant returns (bytes32 result) {
@@ -91,17 +91,6 @@ contract StringMapper {
         }
     }
 
-    function stringToArray(string spaced) constant returns (bytes32[1][] result) {
-        var spaces = spaced.toSlice();
-        var delim  = ' '.toSlice();
-        var items  = spaces.count(delim);
-        result = new bytes32[1][](items+1);
-
-        for(uint i = 0; i < items+1; i++) {
-            result[i][0] = stringToBytes32(spaces.split(delim).toString());
-        }
-    }
-
     function becomeMember() payable minimalFee NoReentrancy returns(bool) {
         members[msg.sender] = members[msg.sender] + msg.value;
         return true;
@@ -117,23 +106,23 @@ contract StringMapper {
         }
     }
 
-    function addKeyValue(string title, string mainhash, string mediahash, uint mediacount) payable NoReentrancy isMember returns(bool) {
+    function addKeyValue(string title, string mainhash, string mediahashs, uint mediacount) payable NoReentrancy isMember returns(bool) {
         if (bytes(title).length == 0 || bytes(mainhash).length == 0 || mediacount < 1) throw;
 
         bytes32 hash = sha3(title);
         if(bytes(map[hash].title).length != 0) throw;
         itemcount++;
 
-        map[hash] = ipfsdata(itemcount, title, mainhash, now, msg.sender, mediacount, hash);
+        map[hash] = ipfsdata(itemcount, title, mainhash, now, msg.sender, mediacount);
 
         if (mediacount > 1) {
-          // split mediahash into ipfspics mapping
-          var media  = mediahash.toSlice();
           var delim  = ','.toSlice();
+          var media  = mediahashs.toSlice();
           var mcount = media.count(delim)+1;
-    
+
+          // split mediahashs into ipfsmedia mapping
           for(uint i = 1; i <= mcount; i++) {
-            map[hash].ipfspics[i] = media.split(delim).toString();
+            map[hash].ipfsmedia[i] = media.split(delim).toString();
           }
         }
 
@@ -180,7 +169,7 @@ contract StringMapper {
 
         uint al = end - start + 1;
 
-        if (al > pagemax || al <= 0) throw;
+        if (al > 32 || al <= 0) throw; // 32 items per page max
 
         results = new bytes32[7][](al);
         for (uint i = start; i <= end; i++) {
@@ -199,7 +188,7 @@ contract StringMapper {
 
         uint al = end - start + 1;
 
-        if (al > pagemax || al <= 0) throw;
+        if (al > 32 || al <= 0) throw; // 32 items per page max
 
         results = new bytes32[7][](al);
 
@@ -214,76 +203,63 @@ contract StringMapper {
         return results; 
     }
 
-    function doSha3( string testingString ) constant returns (bytes32) { return sha3( testingString ); }
-
-    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title, uint mcount, bytes32[2][] pichashs){
+    function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title, uint mcount, bytes32[2][] mediahashs){
         date = map[hash].datemark;
         author = map[hash].poster;
         value = map[hash].qmhash;
         title = listum[map[hash].postid];
-        mcount = map[hash].piccount;
+        mcount = map[hash].mediacount;
+        uint i;
 
-        pichashs = new bytes32[2][](mcount-1);
+        mediahashs = new bytes32[2][](mcount-1);
 
-        for (uint i = 1; i <=mcount-1; i++) {
-          pichashs[i-1][0] = stringToBytes32s(map[hash].ipfspics[i], 32);
-          pichashs[i-1][1] = stringToBytes32s(map[hash].ipfspics[i], 64);
+        for (i = 1; i <=mcount-1; i++) { 
+            mediahashs[i-1][0] = stringToBytes32s(map[hash].ipfsmedia[i], 32);
+            mediahashs[i-1][1] = stringToBytes32s(map[hash].ipfsmedia[i], 64);
         }
-
     }
 
-    function getValue(string key) constant returns(string){
-        bytes32 hash = sha3( key );
-        return map[hash].qmhash;
-    }
-
-    function getKey(uint id) constant returns (bytes32) {
-        return stringToBytes32(listum[id]);
-    }
-
-    function getAllKeys() constant returns (bytes32[1][] results) {
-        results = new bytes32[1][](itemcount);
-
-        for (uint i = 0; i < itemcount; i++) {
-            uint id = i + 1;
-            if (uint(deleted[id]) != 0) continue;
-            results[i][0] = stringToBytes32(listum[id]);
-        }
-        return results;
-    }
-
-    function delKeyValue(uint id, bytes32 hash) payable returns(bool) {
+    function delKeyValue(uint id, bytes32 hash) payable isAuthor(hash) returns(bool) {
         if(bytes(listum[id]).length == 0 || sha3 (listum[id]) != hash) throw;
-        itemdeleted++;
         deleted[id] = hash;
+        if (delete_head != 0 && id - 1 < delete_head) delete_head = id - 1;
+
         if (packTable() == false) throw;
     }
 
     function packTable() payable returns(bool) {
         uint newtotal;
         uint delete_count = 0;
+        uint thisbatch = itemcount;
+        uint thishead = delete_head;
+        if (itemcount - thishead > 100) thisbatch = thishead + 100;
       
-        for (uint i = 0; i < itemcount; i++) {
-            uint id = i + 1;
+        for (uint i = thishead; i <= thisbatch; i++) {
+            //uint id = i + 1;
+            if (i == thisbatch) {
+              delete_head = thisbatch; 
+              itemcount = newtotal;
+              return true;
+            }
 
-            if (uint(deleted[id]) != 0) { 
-                delete map[deleted[id]];
-                delete replies[deleted[id]];
+            if (uint(deleted[i+1]) != 0) {
+                delete map[deleted[i+1]];
+                delete replies[deleted[i+1]];
                 delete_count++;
-                delete listum[id];
-                delete deleted[id];
+                delete listum[i+1];
+                delete deleted[i+1];
                 continue; 
             }
 
-            listum[id - delete_count] = listum[id];
+            listum[i + 1 - delete_count] = listum[i+1];
             if (delete_count != 0) {
-                delete listum[id];
+                delete listum[i+1];
             }
             newtotal++;
         }
 
         itemcount = newtotal;
-        itemdeleted = 0;
+        return true;
     }
 
     function () payable {}
