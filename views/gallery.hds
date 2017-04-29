@@ -78,15 +78,21 @@
 
 <script>
 var wptitle = document.getElementById('thiskey');
+var timeoutT;
 wptitle.onkeyup = wptitle.onkeypress = function(){
-    document.getElementById('pTitle').innerHTML = this.value;
+    clearTimeout(timeoutT);
+    var myvalue = this.value;
+    timeoutT = setTimeout(function() { document.getElementById('pTitle').innerHTML = myvalue }, 550);
 }
 </script>
 
 <script>
 var wpcontent = document.getElementById('thisval');
+var timeoutA;
 wpcontent.onkeyup = wpcontent.onkeypress = function(){
-  document.getElementById('content').innerHTML = marked(this.value, {sanitize: true});
+    clearTimeout(timeoutA);
+    var myvalue = this.value;
+    timeoutA = setTimeout(function() { document.getElementById('content').innerHTML = marked(myvalue, {sanitize: true}) }, 550);
 }
 </script>
 

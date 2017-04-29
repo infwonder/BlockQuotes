@@ -17,6 +17,12 @@
   </div>
   </div>
   </div>
+
+  <div id="audFrame" class="container" style="background-color: #fff">
+  <table id="audTBL" class="picture-frame" >
+    <tr></tr>
+  </table>
+  </div>
 {{/if}}
 
   <div class="container">
@@ -46,33 +52,54 @@
       // write the ArrayBuffer to a blob, and you're done
       var blob = new Blob([ia], {type: mimeString});
 
-      var ai = document.createElement('a');
-      ai.href = URL.createObjectURL(blob);
+      // now handles different types of media based on mimeString
+      if (mimeString.match(/^image\/.*/)) {
+        var ai = document.createElement('a');
+        ai.href = URL.createObjectURL(blob);
+  
+        var image = new Image();
+        image.src = dataURL;
+        image.className = "hover-shadow";
+        image.id = ipfshash;
+  
+        image.onload = function () {
+          image.width = this.width/this.height*500;
+          image.height = 500;
+          ai.appendChild(this);
+  
+          var tb = document.getElementById("imgTBL");
+          var row = tb.rows[tb.rows.length-1];
+  
+          if (row.cells.length < 3) {
+            var x = row.insertCell(0);
+            x.style.border = "3px solid #eee";
+            x.appendChild(ai);
+          } else {
+            var x = tb.insertRow(-1);
+            var y = x.insertCell(0);
+            y.style.border = "3px solid #eee";
+            y.appendChild(ai);
+          }
+        };
+      } else if (mimeString.match(/^audio\/.*/)) {
+        console.log("loading ...");
+        var audio = document.createElement('AUDIO');
+        audio.src = URL.createObjectURL(blob);
+        audio.load();
 
-      var image = new Image();
-      image.src = dataURL;
-      image.className = "hover-shadow";
-      image.id = ipfshash;
+        if (!audio.canPlayType("audio/mpeg")) {
+          console.log("cannot play mp3! use ogg instead");
+        }
 
-      image.onload = function () {
-        image.width = this.width/this.height*500;
-        image.height = 500;
-        ai.appendChild(this);
+        audio.setAttribute("controls", "controls");
 
-        var tb = document.getElementById("imgTBL");
+        var tb = document.getElementById("audTBL");
         var row = tb.rows[tb.rows.length-1];
 
-        if (row.cells.length < 3) {
-          var x = row.insertCell(0);
-          x.style.border = "3px solid #eee";
-          x.appendChild(ai);
-        } else {
-          var x = tb.insertRow(-1);
-          var y = x.insertCell(0);
-          y.style.border = "3px solid #eee";
-          y.appendChild(ai);
-        }
-      };
+        var x = row.insertCell(-1);
+        x.appendChild(audio);
+        x.align = 'center';        
+      }
     });
   };
 </script>

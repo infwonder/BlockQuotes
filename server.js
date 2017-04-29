@@ -343,26 +343,21 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     console.log(JSON.stringify(request.body, null, 2));
     var thiskey = request.body.keystr;
     var texthash = request.body.valstr;
-    var picount = request.body.totalHashs; 
+    var phcount = request.body.totalHashs; 
     var phlist = [];
-    var ahlist = [];
 
     Object.keys(request.body).map( (i) => 
     { 
-       if (i.match(/^ipfs-img/)) {
+       if (i.match(/^ipfs-.*/)) {
          phlist.push(request.body[i]);
-       } else if (i.match(/^ipfs-aud/)) {
-         ahlist.push(request.body[i]);
        }
     });
 
     var pichashs = phlist.join(',');
-    var audhashs = phlist.join(',');
 
-    console.log("Images: " + pichashs);
-    console.log("Audio: " + audhashs);
+    console.log(pichashs);
 
-    StrMapIns.addKeyValue(thiskey, texthash, pichashs, audhashs, picount, {from: web3.eth.accounts[0], gas: 600000}).then( (result) => 
+    StrMapIns.addKeyValue(thiskey, texthash, pichashs, phcount, {from: web3.eth.accounts[0], gas: 600000}).then( (result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';

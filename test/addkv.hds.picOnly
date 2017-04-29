@@ -21,16 +21,6 @@
 
 <div class="container" id="content" style="margin: 0 auto; white-space: pre-wrap; font-size: 1.256em; font-family: monospace;"></div>
 
-<br><br>
-
-<div id="audFrame" class="container" style="display:none">
-<table id="audPre" class="picture-frame" >
-  <tr></tr>
-</table>
-</div>
-
-<hr>
-
 <div class="container" align="center" id="editor">
       <div class="col-md-12" align="left"><label for="thiskey">The new key:</label>
       <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>
@@ -49,9 +39,7 @@
       <tr>
         <td align="left">Select a File to Load:</td>
         <td align="left" colspan="3"><input type="file" id="fileToLoad" onchange="loadImage()"/></td>
-        <td align="right" style="display:none"><input id="totalMedia" size=6 name="totalm" value=0 /> media loaded</td>
-        <td align="right" style="display:none"><input id="totalPics" size=6 name="totalp" value=0 /> image(s) loaded</td>
-        <td align="right" style="display:none"><input id="totalAuds" size=6 name="totala" value=0 /> audio(s) loaded</td>
+        <td align="right" style="display:none"><input id="totalPics" size=6 name="total" value=0 /> image(s) loaded</td>
       </tr>
 </table>
 <br>
@@ -75,122 +63,32 @@
   </div>
 <hr>
 
+
 <script>
 var wptitle = document.getElementById('thiskey');
-var timeoutT;
 wptitle.onkeyup = wptitle.onkeypress = function(){
-    clearTimeout(timeoutT);
-    var myvalue = this.value;
-    timeoutT = setTimeout(function() { document.getElementById('pTitle').innerHTML = myvalue }, 550);
+    document.getElementById('pTitle').innerHTML = this.value;
 }
 </script>
 
 <script>
 var wpcontent = document.getElementById('thisval');
-var timeoutA;
 wpcontent.onkeyup = wpcontent.onkeypress = function(){
-    clearTimeout(timeoutA);
-    var myvalue = this.value;
-    timeoutA = setTimeout(function() { document.getElementById('content').innerHTML = marked(myvalue, {sanitize: true}) }, 550);
+  document.getElementById('content').innerHTML = marked(this.value, {sanitize: true});
 }
 </script>
 
 <script>
-  function addHiddenAud(value, fn) {
-    // Create a hidden input element:
-    //var kvform = document.forms.namedItem('newkv');
-    var formdata = document.getElementById('formdata');
-    var input = document.createElement('input');
-    var audno = document.getElementById('totalAuds');
-    var medno = document.getElementById('totalMedia');
-    var thash = document.getElementById('totalHashs');
-    var count = audno.value; count++;
-    var countm = medno.value; countm++;
-    audno.value = count;
-    medno.value = countm;
-
-    console.log("Now we have " + count + " audio(s) in total...");
-    console.log("Now we have " + countm + " media in total...");
-
-    var audframe = document.getElementById('audFrame');
-    if (count != 0) audframe.style = 'display:all; background-color: #fff' ;
-
-    var key   = 'aud' + count;
-
-    input.type = 'hidden';
-    input.name = key; // name-as-seen-at-the-server
-    input.id = key;
-    input.className = 'durl';
-    input.value = value;
-    var tbl = document.getElementById("dataCell");
-    var row = tbl.insertRow(-1);
-    row.id  = 'holder-' + fn;
-    var col = row.insertCell(-1);
-    col.appendChild(input);
-
-    // preparing input for newkv form (no value yet)
-    var inputp = document.createElement('input');
-    inputp.name = 'ipfs-' + key;
-    inputp.id = 'ipfs-' + key;
-    inputp.size = 96;
-    inputp.style = 'display:none';
-    inputp.onchange = ruReady(inputp.name);
-
-    //kvform.appendChild(inputp);
-    formdata.appendChild(inputp);
-
-    var btnp = document.createElement('button');
-    btnp.type = 'button';
-    btnp.style.width = '400px';
-    btnp.name = 'reset' + 'ipfs-' + key;
-    btnp.id = 'reset' + 'ipfs-' + key;
-    btnp.onclick = function() {
-      var picn = document.getElementById('totalAuds');
-      var medn = document.getElementById('totalMedia');
-      var thsh = document.getElementById('totalHashs');
-      var i = document.getElementById(this.name.substr(5));
-      i.parentNode.removeChild(i); console.log(this.id);
-      var k = document.getElementById(this.name.substr(10));
-      k.parentNode.removeChild(k);
-      var t = document.getElementById('aplayer-'+ fn);
-      t.parentNode.removeChild(t);
-      var r = document.getElementById('tb-row-'+ fn);
-      r.parentNode.removeChild(r);
-      this.parentNode.removeChild(this);
-      var h = document.getElementById('holder-'+ fn);
-      h.parentNode.removeChild(h);
-      if (picn.value > 0) { 
-        picn.value--;
-        if (picn.value == 0) {
-          console.log("Audn is now 0");
-          var pframe = document.getElementById('audFrame');
-          pframe.style = "display:none"; 
-        } 
-      }
-      if (thsh.value > 0) thsh.value--;
-      if (medn.value > 0) medn.value--;
-    };
-   btnp.innerHTML = 'delete ' + fn;
-   col.appendChild(btnp);
-  }
-
-
-  function addHiddenImg(value, fn) {
+  function addHidden(value, fn) {
     // Create a hidden input element:
     //var kvform = document.forms.namedItem('newkv');
     var formdata = document.getElementById('formdata');
     var input = document.createElement('input');
     var picno = document.getElementById('totalPics');
-    var medno = document.getElementById('totalMedia');
     var thash = document.getElementById('totalHashs');
-
     var count = picno.value; count++;
-    var countm = medno.value; countm++;
     picno.value = count;
-    medno.value = countm;
-
     console.log("Now we have " + count + " picture(s) in total...");
-    console.log("Now we have " + countm + " media in total...");
 
     var picframe = document.getElementById('picFrame');
     if (count != 0) picframe.style = 'display:all; background-color: #fff' ;
@@ -226,7 +124,6 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
     btnp.id = 'reset' + 'ipfs-' + key;
     btnp.onclick = function() {
       var picn = document.getElementById('totalPics');
-      var medi = document.getElementById('totalMedia');
       var thsh = document.getElementById('totalHashs');
       var i = document.getElementById(this.name.substr(5));
       i.parentNode.removeChild(i); console.log(this.id);
@@ -250,7 +147,6 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
         } 
       }
       if (thsh.value > 0) thsh.value--;
-      if (medi.value > 0) medi.value--;
     };
    btnp.innerHTML = 'delete ' + fn;
    col.appendChild(btnp);
@@ -268,92 +164,60 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
       var byteString = atob(dataURL.split(',')[1]);
       contentType = dataURL.split(",")[0].split(":")[1].split(";")[0];
 
-      if ( contentType.match(/audio\/.*/) ) {
-        console.log("loading ...");
-        var audio = document.createElement('AUDIO');
+      var image = new Image();
+      image.src = dataURL;
+      image.className = "hover-shadow";
+      image.id = 'thumb-' + fname;
 
-        // write the bytes of the string to an ArrayBuffer
-        var ab = new ArrayBuffer(byteString.length);
-        var ia = new Uint8Array(ab);
-        for (var i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
-        }
+      // write the bytes of the string to an ArrayBuffer
+      var ab = new ArrayBuffer(byteString.length);
+      var ia = new Uint8Array(ab);
+      for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
 
-        var blob = new Blob([ia], {type: contentType});
-        audio.src = URL.createObjectURL(blob);
-        audio.load();
+      // write the ArrayBuffer to a blob, and you're done
+      var blob = new Blob([ia], {type: contentType});
 
-        if (!audio.canPlayType("audio/mpeg")) {
-          console.log("cannot play mp3! use ogg instead");
-        }
+      var ai = document.createElement('a');
+      ai.href = URL.createObjectURL(blob);
+      ai.id = 'blob-' + fname;
 
-        audio.id = "aplayer-" + fname;
-        audio.setAttribute("controls", "controls");
-        addHiddenAud(dataURL, fname);
+      image.onload = function() {
+        image.width = this.width/this.height*500;
+        image.height = 500;
+        addHidden(dataURL, fname);
 
-        var tb = document.getElementById("audPre");
+        console.log("Image type: " + contentType);
+        console.log("Image width: " + this.width);
+        console.log("Image height: " + this.height);
+        ai.appendChild(this);
+
+        var tb = document.getElementById("imgPre");
         var row = tb.rows[tb.rows.length-1];
 
-        var x = row.insertCell(-1);
-        x.appendChild(audio);
-        x.id = 'tb-row-' + fname;
-        x.align = 'center';
-      } else if ( contentType.match(/image\/.*/) ) {
-        var image = new Image();
-        image.src = dataURL;
-        image.className = "hover-shadow";
-        image.id = 'thumb-' + fname;
-  
-        // write the bytes of the string to an ArrayBuffer
-        var ab = new ArrayBuffer(byteString.length);
-        var ia = new Uint8Array(ab);
-        for (var i = 0; i < byteString.length; i++) {
-          ia[i] = byteString.charCodeAt(i);
+        var pal = 'center';
+/*
+        if (row.cells.length % 3 === 0) pal = 'right';
+        if (row.cells.length % 3 === 1) pal = 'center';
+        if (row.cells.length % 3 === 2) pal = 'left';
+*/
+
+        if (row.cells.length < 3) {
+          var x = row.insertCell(-1);
+          x.id = 'tb-row-' + fname;
+          x.style.border = "3px solid #eee";
+          x.align = pal;
+          x.appendChild(ai);
+        } else {
+          var x = tb.insertRow(-1);
+          var y = x.insertCell(0);
+          y.id = 'tb-row-' + fname;
+          y.style.border = "3px solid #eee";
+          y.align = pal;
+          y.appendChild(ai);
         }
-  
-        // write the ArrayBuffer to a blob, and you're done
-        var blob = new Blob([ia], {type: contentType});
-  
-        var ai = document.createElement('a');
-        ai.href = URL.createObjectURL(blob);
-        ai.id = 'blob-' + fname;
-  
-        image.onload = function() {
-          image.width = this.width/this.height*500;
-          image.height = 500;
-          addHiddenImg(dataURL, fname);
-  
-          console.log("Image type: " + contentType);
-          console.log("Image width: " + this.width);
-          console.log("Image height: " + this.height);
-          ai.appendChild(this);
-  
-          var tb = document.getElementById("imgPre");
-          var row = tb.rows[tb.rows.length-1];
-  
-          var pal = 'center';
-  /*
-          if (row.cells.length % 3 === 0) pal = 'right';
-          if (row.cells.length % 3 === 1) pal = 'center';
-          if (row.cells.length % 3 === 2) pal = 'left';
-  */
-  
-          if (row.cells.length < 3) {
-            var x = row.insertCell(-1);
-            x.id = 'tb-row-' + fname;
-            x.style.border = "3px solid #eee";
-            x.align = pal;
-            x.appendChild(ai);
-          } else {
-            var x = tb.insertRow(-1);
-            var y = x.insertCell(0);
-            y.id = 'tb-row-' + fname;
-            y.style.border = "3px solid #eee";
-            y.align = pal;
-            y.appendChild(ai);
-          }
-        };
-      }
+      };
     };
     dataURLReader.readAsDataURL(file);
   };
@@ -430,7 +294,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
   function ruReady(keyname) {
     var allhsh = document.getElementById('totalHashs');
     var subbtn = document.getElementById('BlockChainIt');
-    var allpic = document.getElementById('totalMedia').value;
+    var allpic = document.getElementById('totalPics').value;
     console.log("inside ruReady ... keyname = " + keyname);
     var v = parseInt(allpic) + 1; 
 
@@ -477,6 +341,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
 
     formdata.appendChild(inputt);
 
+    var total = document.getElementById('totalPics').value;
     var allimgs = document.getElementsByClassName('durl');
 
     function updateHash(i) {
