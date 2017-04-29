@@ -69,6 +69,7 @@
   window.loadImage = function() {
     var file = document.getElementById("fileToLoad").files[0];
     var reader = new FileReader();
+    var fname = file.name;
 
     var dataURLReader = new FileReader();
     dataURLReader.onload = function(event) {
@@ -77,56 +78,88 @@
       var byteString = atob(dataURL.split(',')[1]);
       contentType = dataURL.split(",")[0].split(":")[1].split(";")[0];
 
-      var image = new Image();
-      image.src = dataURL;
-      image.className = "hover-shadow";
+      console.log(contentType);
 
-      // write the bytes of the string to an ArrayBuffer
-      var ab = new ArrayBuffer(byteString.length);
-      var ia = new Uint8Array(ab);
-      for (var i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
 
-      // write the ArrayBuffer to a blob, and you're done
-      var blob = new Blob([ia], {type: contentType});
+     if (contentType.match(/audio\/.*/)) {
+        console.log("loading ...");
+        var audio = document.createElement('AUDIO');
+  
+        // write the bytes of the string to an ArrayBuffer
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+        for (var i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
 
-      var ai = document.createElement('a');
-      ai.href = URL.createObjectURL(blob);
+        var blob = new Blob([ia], {type: contentType});
+        audio.src = URL.createObjectURL(blob);
+        audio.load();
+  
+        if (!audio.canPlayType("audio/mpeg")) {
+          console.log("cannot play mp3! use ogg instead");
+        }
 
-      image.onload = function() {
-        image.height = 973/this.width*this.height;
-        image.width  = 973;
-//        image.width = this.width/this.height*500;
-//        image.height = 500;
-        addHidden(dataURL);
-
-        console.log("Image type: " + contentType);
-        console.log("Image width: " + this.width);
-        console.log("Image height: " + this.height);
-        ai.appendChild(this);
+        audio.setAttribute("controls", "controls");
 
         var tb = document.getElementById("imgPre");
         var row = tb.rows[tb.rows.length-1];
-
-        var pal = '';
-        if (row.cells.length % 3 === 0) pal = 'right';
-        if (row.cells.length % 3 === 1) pal = 'center';
-        if (row.cells.length % 3 === 2) pal = 'left';
-
-        if (row.cells.length < 30) {
-          var x = row.insertCell(-1);
-          x.style.border = "3px solid #eee";
-          x.align = pal;
-          x.appendChild(ai);
-        } else {
-          var x = tb.insertRow(-1);
-          var y = x.insertCell(0);
-          y.style.border = "3px solid #eee";
-          y.align = pal;
-          y.appendChild(ai);
+        var x = row.insertCell(-1);
+        x.appendChild(audio);
+        x.align = 'center';
+      
+     } else if (contentType.match(/image\/.*/)) {
+        var image = new Image();
+        image.src = dataURL;
+        image.className = "hover-shadow";
+  
+        // write the bytes of the string to an ArrayBuffer
+        var ab = new ArrayBuffer(byteString.length);
+        var ia = new Uint8Array(ab);
+        for (var i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
         }
-      };
+  
+        // write the ArrayBuffer to a blob, and you're done
+        var blob = new Blob([ia], {type: contentType});
+  
+        var ai = document.createElement('a');
+        ai.href = URL.createObjectURL(blob);
+  
+        image.onload = function() {
+          image.height = 973/this.width*this.height;
+          image.width  = 973;
+//        image.width = this.width/this.height*500;
+//        image.height = 500;
+          addHidden(dataURL);
+  
+          console.log("Image type: " + contentType);
+          console.log("Image width: " + this.width);
+          console.log("Image height: " + this.height);
+          ai.appendChild(this);
+  
+          var tb = document.getElementById("imgPre");
+          var row = tb.rows[tb.rows.length-1];
+  
+          var pal = '';
+          if (row.cells.length % 3 === 0) pal = 'right';
+          if (row.cells.length % 3 === 1) pal = 'center';
+          if (row.cells.length % 3 === 2) pal = 'left';
+  
+          if (row.cells.length < 30) {
+            var x = row.insertCell(-1);
+            x.style.border = "3px solid #eee";
+            x.align = pal;
+            x.appendChild(ai);
+          } else {
+            var x = tb.insertRow(-1);
+            var y = x.insertCell(0);
+            y.style.border = "3px solid #eee";
+            y.align = pal;
+            y.appendChild(ai);
+          }
+        };
+      }
     };
     dataURLReader.readAsDataURL(file);
   };

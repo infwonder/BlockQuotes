@@ -133,6 +133,13 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     });
   });
 
+// testing binary (image at the moment) upload to IPFS
+// this will eventually become part of /addkey
+  app.get('/gallery', function(request, response) 
+  {
+    response.render('gallery'); 
+  });
+
   app.post('/entrance', function(request, response) 
   {
     StrMapIns.checkMembership(web3.eth.accounts[0]).then((result) => 
@@ -281,10 +288,6 @@ StrMapCtr.deployed().then( (StrMapIns) =>
         response.render('member');
       }
     }).catch((err) => { catchedError(response, err); });
-
-
-
-
   });
 
   app.post('/reply/:phash', function(request, response) 
