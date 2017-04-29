@@ -333,6 +333,7 @@ wpcontent.onkeyup = wpcontent.onkeypress = function(){
       inputa.size = 96;
       inputa.onchange = ruReady('valstr');
       inputa.value = hash;
+      inputa.readOnly = true;
       //kvform.appendChild(inputa);
       formdata.appendChild(inputa);
       console.log(hash);

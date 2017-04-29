@@ -5,9 +5,11 @@ import "./strings.sol";
 contract StringMapper {
     using strings for *;
 
+    bool locked;
     uint public itemcount;
     uint itemdeleted;
     uint pagemax;
+    uint fee = 1 ether;
 
     struct ipfsdata {
       uint postid;
@@ -23,6 +25,7 @@ contract StringMapper {
     mapping(uint => string) listum; // for looping list
     mapping(bytes32 => ipfsdata) map;
     mapping(uint => bytes32) deleted;
+    mapping(address => uint) members;
 
     struct associate {
         uint replycount;
@@ -32,6 +35,23 @@ contract StringMapper {
     }
 
     mapping(bytes32 => associate) replies;
+
+    modifier NoReentrancy() {
+        if (locked) throw;
+        locked = true;
+        _;
+        locked = false;
+    }
+
+    modifier minimalFee() {
+        if (msg.value < fee) throw;
+        _;
+    }
+
+    modifier isMember() {
+        if (members[msg.sender] == 0) throw;
+        _;
+    }
 
     function StringMapper() payable { 
         itemcount = 0;
@@ -82,7 +102,22 @@ contract StringMapper {
         }
     }
 
-    function addKeyValue(string title, string mainhash, string mediahash, uint mediacount) payable returns(bool){
+    function becomeMember() payable minimalFee NoReentrancy returns(bool) {
+        members[msg.sender] = members[msg.sender] + msg.value;
+        return true;
+    }
+
+    function checkMembership(address thisone) constant returns(bool status, uint balance) {
+        if (members[thisone] == 0) {
+          status = false;
+          balance = 0;
+        } else {
+          status = true;
+          balance = members[thisone];
+        }
+    }
+
+    function addKeyValue(string title, string mainhash, string mediahash, uint mediacount) payable NoReentrancy isMember returns(bool) {
         if (bytes(title).length == 0 || bytes(mainhash).length == 0 || mediacount < 1) throw;
 
         bytes32 hash = sha3(title);
@@ -109,13 +144,20 @@ contract StringMapper {
         return true;
     }
 
-    function addReply(bytes32 postid, string comment) payable returns(bool) {
-        if (bytes(comment).length == 0 || bytes(map[postid].title).length == 0) throw;
+    function addReply(bytes32 postid, string comment, uint tip, address recipient) payable NoReentrancy isMember returns(bool) {
+        if (bytes(comment).length == 0 || bytes(map[postid].title).length == 0 || members[msg.sender] <= tip) throw;
         replies[postid].replycount++;
         uint rid = replies[postid].replycount;
         replies[postid].posts[rid] = comment;
         replies[postid].rdmap[rid] = now;
         replies[postid].rpmap[rid] = msg.sender;
+
+        members[msg.sender] = members[msg.sender] - tip;
+
+        if (!recipient.send(tip)) {
+          members[msg.sender] = members[msg.sender] + tip;
+          throw;
+        }
 
         return true;
     }
@@ -243,4 +285,6 @@ contract StringMapper {
         itemcount = newtotal;
         itemdeleted = 0;
     }
+
+    function () payable {}
 }

@@ -1,0 +1,36 @@
+  <style>
+     html {
+      background: url('/images/mainback.jpg') no-repeat center center fixed; 
+      -moz-background-size: cover;
+     }
+     
+     body {
+      background: transparent;
+     }
+  </style>
+
+      <div style="margin-top: 10%; background-color: rgba(0,0,0,0.75);">
+      <br><p>
+      <h1 align="center" style="font-size: 4em; color: #fff">Become a member for just 3 ether and get: </h1>
+      <br>
+       <ul style="width: 55%; margin:auto; font-size: 1.8em; color: #fff">
+        <li> Posting articles (paying only Ethereum Blockchain transaction fee)
+        <li> Tipping authors with comments
+        <li> Your Ether donation will always be yours for various activities on BlockQuotes. 
+       </ul>
+
+      <form id="member" name="member" role="form" action="/join?form='member'" method="POST">
+      <div align="center">
+      <br><br><label for="address" style="font-size: 1em; color: #fff">From Address: &nbsp</label>
+        <input type="text" id="address" name="memberAddr" size=52 maxlength=72 style="font-family: monospace" required placeholder="e.g., 0x15bbd608487cd4b08fa482dfc919cd35978fedf0" />
+        <label for="payment" style="font-size: 1em; color: #fff">&nbsp sends &nbsp</label>
+        <input type="text" id="payment" name="payment" size=4 maxlength=72 required value="3.0" />
+        <label for="payment" style="font-size: 1em; color: #fff">&nbsp Ether</label>
+        <br><br><br><p align="center"><button type="submit">Send</button></p>
+      </div>
+      </form>
+      <br><br></p>
+      <h3 align="center" style="font-size: 3em; color: yellow">Join Now!</h3><h4 align="center" style="font-size: 1em; color: #eee"> (Not refundable)</h4>
+      <br><br>
+      </div>
+

@@ -133,11 +133,33 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     });
   });
 
-// testing binary (image at the moment) upload to IPFS
-// this will eventually become part of /addkey
-  app.get('/gallery', function(request, response) 
+  app.post('/entrance', function(request, response) 
   {
-    response.render('gallery'); 
+    StrMapIns.checkMembership(web3.eth.accounts[0]).then((result) => 
+    {
+      console.log("checking ... ");
+      if (result[0] === true) {
+        response.redirect(303, '/kvstore'); 
+      } else {
+        response.render('member');
+      }
+    }).catch((err) => { catchedError(response, err); });
+  });
+
+  app.post('/join', function(request, response) 
+  {
+    var member = request.body.memberAddr;
+    var fund   = request.body.payment;
+
+    StrMapIns.becomeMember({from: web3.eth.accounts[0], value: web3.toWei(fund, 'ether')}).then((result) => 
+    {
+      if (result.receipt.blockNumber === null) {
+        var err = 'Transaction ' + result.tx + ' failed ...';
+        throw(err);
+      }
+
+      response.redirect(303, '/kvstore'); 
+    }).catch((err) => { catchedError(response, err); });
   });
 
   app.get('/post/:phash', function(request, response) 
@@ -258,8 +280,10 @@ StrMapCtr.deployed().then( (StrMapIns) =>
   {
     var hash = request.params.phash; // need validation!
     var comment = request.body.thisrc;
+    var tips = request.body.ammount;
+    var recipient = request.body.sendto;
 
-    StrMapIns.addReply(hash, comment, {from: web3.eth.accounts[1], gas: 600000}).then((result) => 
+    StrMapIns.addReply(hash, comment, web3.toWei(tips, 'ether'), recipient, {from: web3.eth.accounts[0], gas: 600000}).then((result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';
@@ -288,7 +312,16 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 // Add new key
   app.get('/addkey', function(request, response) 
   {
-    response.render('addkv', {key: ''});
+    StrMapIns.checkMembership(web3.eth.accounts[0]).then((result) => 
+    {
+      console.log("checking ... ");
+      if (result[0] === true) {
+        response.render('addkv', {key: ''});
+      } else {
+        response.render('member');
+      }
+    }).catch((err) => { catchedError(response, err); });
+
   });
 
 /*
@@ -338,7 +371,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 
     console.log(pichashs);
 
-    StrMapIns.addKeyValue(thiskey, texthash, pichashs, picount, {from: web3.eth.accounts[1], gas: 600000}).then( (result) => 
+    StrMapIns.addKeyValue(thiskey, texthash, pichashs, picount, {from: web3.eth.accounts[0], gas: 600000}).then( (result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';

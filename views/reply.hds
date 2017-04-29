@@ -11,7 +11,7 @@
         <label for="sendto">Send &nbsp</label> 
         <input id="amount" name="amount" size=4 value="0.10" style="font-size:1.2em; font-family:monospace;" /><label for="amount">&nbsp Ether</label>
         <label for="sendto">&nbsp to Address: &nbsp</label>
-          <span></span><input id="sendto" name="senddo" size=44 readonly style="font-size:1.2em; font-family:monospace;" value="{{author}}" /><span></span>
+          <span></span><input id="sendto" name="sendto" size=44 readonly style="font-size:1.2em; font-family:monospace;" value="{{author}}" /><span></span>
         </div>
 
         <div class="col-md-12" align="left"><label align="left" for="thisrc">Your comment: (max char.: 128)</label>

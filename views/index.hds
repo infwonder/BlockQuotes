@@ -1,12 +1,24 @@
-  <div class="jumbotron">
-    <div class="container">
-      <h1 align="center">Welcome to BlockQuotes</h1><h3 align="center">An Ethereum Dapp for Blogging and Note-taking!</h3>
-      <form role="form" action="/querykey?form="querykey" method="POST">
+  <style>
+     html {
+      background: url('/images/mainback.jpg') no-repeat center center fixed; 
+      -moz-background-size: cover;
+     }
+     
+     body {
+      background: transparent;
+     }
+  </style>
+
+      <div style="margin-top: 15%; background-color: rgba(0,0,0,0.75);">
+      <br><p>
+      <h1 align="center" style="font-size: 7em; color: #fff">Welcome to BlockQuotes</h1>
+      <h3 align="center" style="font-size: 2em; color: #fff">An Ethereum Dapp for Blogging and Note-taking!</h3>
+      <h3 align="center" style="font-size: 1em; color: #fff">Powered by IPFS!</h3>
+      <form role="form" action="/entrance?form="querykey" method="POST">
       <div align="center">
-      <br><br><label for="keyquery">Please enter key:</label>
-        <input type="text" id="keyquery" name="keystr" size=72 maxlength=128 required placeholder="e.g., my precious key"></input>
-        <button type="submit">Send</button>
+      <br><br>
+        <button type="submit">Get Started</button>
       </div>
       </form>
-    </div>
-  </div>
+      <br><br><br></p>
+      </div>
