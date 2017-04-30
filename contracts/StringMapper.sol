@@ -7,7 +7,6 @@ contract StringMapper {
 
     bool locked;
     uint public itemcount;
-    uint harden = 100;
 
     struct ipfsdata {
       uint postid;
