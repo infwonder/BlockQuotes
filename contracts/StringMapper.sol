@@ -19,6 +19,7 @@ contract StringMapper {
     }
 
     mapping(uint => string) listum; // for looping list
+    mapping(uint => bytes32) listhash; // for looping list
     mapping(bytes32 => ipfsdata) map;
     mapping(uint => bytes32) deleted;
     mapping(address => uint) members;
@@ -127,6 +128,7 @@ contract StringMapper {
 
         // update data
         listum[itemcount] = title;
+        listhash[itemcount] = hash;
         replies[hash] = associate(0);
 
         return true;
@@ -193,7 +195,7 @@ contract StringMapper {
 
         for (uint i = start; i <= end; i++) {
             results[i-start] = title(listum[i+1]);
-            bytes32 hash = sha3( listum[i+1] );
+            bytes32 hash = listhash[i+1];
             results[i-start][4] = hash;
             results[i-start][5] = bytes32(map[hash].datemark);
             results[i-start][6] = bytes32(map[hash].poster);
@@ -205,7 +207,7 @@ contract StringMapper {
     function getIdByHash(bytes32 hash) constant returns(uint id, address author) {
         author = map[hash].poster;
         id = map[hash].postid;
-        if(bytes(listum[id]).length == 0 || sha3 (listum[id]) != hash) throw;
+        if(bytes(listum[id]).length == 0 || listhash[id] != hash) throw;
     }
 
     function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title, uint mcount, bytes32[2][] mediahashs){
@@ -225,7 +227,7 @@ contract StringMapper {
     }
 
     function delKeyValue(uint id, bytes32 hash) payable isAuthor(hash) returns(bool) {
-        if(bytes(listum[id]).length == 0 || sha3 (listum[id]) != hash) throw;
+        if(bytes(listum[id]).length == 0 || listhash[id] != hash) throw;
         deleted[id] = hash;
 
         if (packTable(id) == false) throw;
@@ -247,13 +249,18 @@ contract StringMapper {
                 delete replies[deleted[i]];
                 delete_count++;
                 delete listum[i];
+                delete listhash[i];
                 delete deleted[i];
                 continue; 
             }
 
             listum[i - delete_count] = listum[i];
+            listhash[i - delete_count] = listhash[i];
+            map[ listhash[i] ].postid = i - delete_count;
+
             if (delete_count != 0) {
                 delete listum[i];
+                delete listhash[i];
             }
             newtotal++;
         }
