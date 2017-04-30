@@ -1,0 +1,27 @@
+##### (This is my final project for B9Lab class.)
+
+I have always wanted to become a blogger.
+
+I believe that the Internet should be used to exchange information, experiences, and knowledge. This is the basis of all great things I love: from Linux Kernel to GitHub; from open source to Wikipedia.
+
+Yet when I actually trying to do blogging, I can't help to notice that most modern blogging platforms often feels like that I am writing with some sort of *sponsorship*. After all, hosting the blog system as well as the database backend can be a lot of work. 
+
+# A New Kind of Blog
+All I want is some form of note taking system that offers enough capabilities while allowing me to share these notes with others. Beyond features, I also need to feel like I am in control with the article that I am wrting, which I never feel so with any other blogging / website creation platforms. 
+In fact, I was once contacted by Google for the note that I copied-pasted on Google Notebook (still remember that product?). 
+
+Knowing that what I was posting is being constantly monitored by the service provider is not only uncomfortable but also makes me worry about the censorship standard that may be biased.
+
+So, I need something that I have total control with while making sure that the platform will not be discontinued unexpectedly. Many had said that the Blockchain system such as Ethereum offers glimpses of what "Web 3.0" is about: A world-wide web that's truly permission-less, decentralized, and enables ["exchange of value"](https://www.youtube.com/watch?v=ykWWrAyt25c). 
+
+That's why I created BlockQuotes... Other than the fact that it is also my final project for the B9Lab Ethereum developer class... I have *never* been a web developer before and there are too many things to learn within such short period. As a result, many features that I want has not yet been realized. 
+
+I will continue to add them to this system. Eventually, I want to package it into a container with Docker to enable rapid deployment or upgrade. 
+
+# Roadmap
+- Integrating simple purchasing / donation system utilizing Ethereum system. 
+- Adding HTML5 support to audio and video contents stored on IPFS.
+- Support full material encryption.
+- Allow local snapshots without committing to Ethereum Blockchain.
+- Light-client support.
+- ...

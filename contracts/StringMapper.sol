@@ -7,7 +7,7 @@ contract StringMapper {
 
     bool locked;
     uint public itemcount;
-    uint delete_head;
+    uint harden = 100;
 
     struct ipfsdata {
       uint postid;
@@ -203,6 +203,12 @@ contract StringMapper {
         return results; 
     }
 
+    function getIdByHash(bytes32 hash) constant returns(uint id, address author) {
+        author = map[hash].poster;
+        id = map[hash].postid;
+        if(bytes(listum[id]).length == 0 || sha3 (listum[id]) != hash) throw;
+    }
+
     function getValueByHash(bytes32 hash) constant returns(uint date, string value, address author, string title, uint mcount, bytes32[2][] mediahashs){
         date = map[hash].datemark;
         author = map[hash].poster;
@@ -222,38 +228,33 @@ contract StringMapper {
     function delKeyValue(uint id, bytes32 hash) payable isAuthor(hash) returns(bool) {
         if(bytes(listum[id]).length == 0 || sha3 (listum[id]) != hash) throw;
         deleted[id] = hash;
-        if (delete_head != 0 && id - 1 < delete_head) delete_head = id - 1;
 
-        if (packTable() == false) throw;
+        if (packTable(id) == false) throw;
     }
 
-    function packTable() payable returns(bool) {
+    function packTable(uint id) payable returns(bool) {
         uint newtotal;
-        uint delete_count = 0;
-        uint thisbatch = itemcount;
-        uint thishead = delete_head;
-        if (itemcount - thishead > 100) thisbatch = thishead + 100;
-      
-        for (uint i = thishead; i <= thisbatch; i++) {
-            //uint id = i + 1;
-            if (i == thisbatch) {
-              delete_head = thisbatch; 
-              itemcount = newtotal;
-              return true;
-            }
+        if (id == 1) {
+          newtotal = 0;
+        } else {
+          newtotal = id - 1;
+        } 
 
-            if (uint(deleted[i+1]) != 0) {
-                delete map[deleted[i+1]];
-                delete replies[deleted[i+1]];
+        uint delete_count = 0;
+      
+        for (uint i = id; i <= itemcount; i++) {
+            if (uint(deleted[i]) != 0) {
+                delete map[deleted[i]];
+                delete replies[deleted[i]];
                 delete_count++;
-                delete listum[i+1];
-                delete deleted[i+1];
+                delete listum[i];
+                delete deleted[i];
                 continue; 
             }
 
-            listum[i + 1 - delete_count] = listum[i+1];
+            listum[i - delete_count] = listum[i];
             if (delete_count != 0) {
-                delete listum[i+1];
+                delete listum[i];
             }
             newtotal++;
         }

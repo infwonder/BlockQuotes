@@ -2,6 +2,10 @@
     <div class="container">
       <br>
       <h1 align="center">{{title}}</h1>
+      {{#if can_delete}}
+      <br>
+      <p align="center"><a href="/delete/{{hash}}" class="btn btn-mid btn-default">Remove</a></p>
+      {{/if}}
     </div>
   </div>
 
@@ -17,7 +21,7 @@
   </div>
   </div>
   </div>
-<br>
+
   <div id="audFrame" class="container" style="background-color: #fff">
   <table id="audTBL" class="picture-frame" >
     <tr></tr>

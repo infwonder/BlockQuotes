@@ -22,7 +22,7 @@ if (typeof web3 !== 'undefined') {
 StrMapCtr.setProvider(web3.currentProvider);
 Migrations.setProvider(web3.currentProvider);
 
-console.log(web3.eth.accounts);
+console.log("ETH coinbase: " + web3.eth.coinbase);
 
 // Hooking up to IPFS
 ipfs.setProvider(require("ipfs-api")('localhost','5001'));
@@ -128,21 +128,26 @@ StrMapCtr.deployed().then( (StrMapIns) =>
         return a;
       }).then((array) => 
       {
-        response.render('kvstore', {kvlist: array, start: start, end: end, page: thispage, firstpage: firstpage, lastpage: lastpage});
-      });
-    });
-  });
-
-// testing binary (image at the moment) upload to IPFS
-// this will eventually become part of /addkey
-  app.get('/gallery', function(request, response) 
-  {
-    response.render('gallery'); 
+        StrMapIns.checkMembership(web3.eth.coinbase).then((result) => {
+          var hdbobj = {
+                coinbase: web3.eth.coinbase,
+             member_type: result[0] ? 'paid (Thank You!)' : 'free',
+                  kvlist: array, 
+                   start: start, 
+                     end: end, 
+                    page: thispage, 
+               firstpage: firstpage, 
+                lastpage: lastpage
+          };
+          response.render('kvstore', hdbobj); 
+        }).catch((err) => { catchedError(response, err); });
+      }).catch((err) => { catchedError(response, err); });
+    }).catch((err) => { catchedError(response, err); });
   });
 
   app.post('/entrance', function(request, response) 
   {
-    StrMapIns.checkMembership(web3.eth.accounts[0]).then((result) => 
+    StrMapIns.checkMembership(web3.eth.coinbase).then((result) => 
     {
       console.log("checking ... ");
       if (result[0] === true) {
@@ -158,7 +163,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     var member = request.body.memberAddr;
     var fund   = request.body.payment;
 
-    StrMapIns.becomeMember({from: web3.eth.accounts[0], value: web3.toWei(fund, 'ether')}).then((result) => 
+    StrMapIns.becomeMember({from: web3.eth.coinbase, value: web3.toWei(fund, 'ether')}).then((result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';
@@ -174,6 +179,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     console.log("called post");
     var thispage = request.query.page || 1;
     var key = request.params.phash;
+    var viewer = web3.eth.coinbase;
  
     console.log("key: " + key);
 
@@ -215,10 +221,10 @@ StrMapCtr.deployed().then( (StrMapIns) =>
   
           if (c == 0) {
             var hdbobj = {title: results[3], hash: key, comment: false, date: d, author: results[2], value: aaa};
+            if (viewer === results[2]) hdbobj['can_delete'] = true;
             if (ipfslist) hdbobj['ipfslist'] = ipfslist;
             response.render('post', hdbobj);
           } else {
-  
             var start = (thispage-1)*16;
             var end   = start+16-1;
             var firstpage = false; var lastpage = false;
@@ -258,6 +264,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
                     title: results[3],
                 };
 
+                if (viewer === results[2]) hdbobj['can_delete'] = true;
                 if (ipfslist) hdbobj['ipfslist'] = ipfslist;                
 
                 response.render('post', hdbobj);
@@ -270,11 +277,38 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     }).catch((err) => { catchedError(response, err); });
   });
 
+  app.get('/delete/:phash', function(request, response) 
+  {
+     var hash = request.params.phash; // need validation!
+     console.log('deleting post ' + hash + ' ...');
+   
+     StrMapIns.getIdByHash(hash).then((results) => 
+     {
+       console.log('checking authorship ...');
+       var author = results[1].toAddress('wallet');
+       if (web3.eth.coinbase == author) {
+         console.log('Is author!');
+         var id = web3.toDecimal(results[0]);
+         StrMapIns.delKeyValue(id, hash, {from: web3.eth.coinbase, gas: 600000}).then((results) => 
+         {
+            if (results.receipt.blockNumber === null) {
+              var err = 'Transaction ' + results.tx + ' failed ...';
+              throw(err);
+            }
+            console.log('Deleted...');
+            response.redirect(303, '/kvstore');
+         });
+       } else {
+         response.redirect(303, '/post/'+ hash); 
+       }
+     }).catch((err) => { catchedError(response, err); });
+  });
+
   app.get('/reply/:phash', function(request, response) 
   {
     var hash = request.params.phash; // need validation!
 
-    StrMapIns.checkMembership(web3.eth.accounts[0]).then((result) =>
+    StrMapIns.checkMembership(web3.eth.coinbase).then((result) =>
     {
       console.log("checking ... ");
       if (result[0] === true) {
@@ -297,7 +331,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
     var tips = request.body.ammount;
     var recipient = request.body.sendto;
 
-    StrMapIns.addReply(hash, comment, web3.toWei(tips, 'ether'), recipient, {from: web3.eth.accounts[0], gas: 600000}).then((result) => 
+    StrMapIns.addReply(hash, comment, web3.toWei(tips, 'ether'), recipient, {from: web3.eth.coinbase, gas: 600000}).then((result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';
@@ -326,7 +360,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 // Add new key
   app.get('/addkey', function(request, response) 
   {
-    StrMapIns.checkMembership(web3.eth.accounts[0]).then((result) => 
+    StrMapIns.checkMembership(web3.eth.coinbase).then((result) => 
     {
       console.log("checking ... ");
       if (result[0] === true) {
@@ -357,7 +391,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
 
     console.log(pichashs);
 
-    StrMapIns.addKeyValue(thiskey, texthash, pichashs, phcount, {from: web3.eth.accounts[0], gas: 600000}).then( (result) => 
+    StrMapIns.addKeyValue(thiskey, texthash, pichashs, phcount, {from: web3.eth.coinbase, gas: 600000}).then( (result) => 
     {
       if (result.receipt.blockNumber === null) {
         var err = 'Transaction ' + result.tx + ' failed ...';

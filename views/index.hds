@@ -17,7 +17,7 @@
       <form role="form" action="/entrance?form="querykey" method="POST">
       <div align="center">
       <br><br>
-        <button type="submit">Get Started</button>
+        <button class="btn btn-mid btn-default" type="submit">Get Started</button>
       </div>
       </form>
       <br><br><br></p>

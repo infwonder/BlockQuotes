@@ -9,14 +9,17 @@
      }
   </style>
 
-      <div style="margin-top: 10%; background-color: rgba(0,0,0,0.75);">
+      <div class="container" style="margin-top: 7%; background-color: rgba(0,0,0,0.75);">
       <br><p>
-      <h1 align="center" style="font-size: 4em; color: #fff">Become a member for just 3 ether and get: </h1>
+      <h1 align="center" style="font-size: 4em; color: #fff">Get Your BlockQuotes Membership</h1>
       <br>
-       <ul style="width: 55%; margin:auto; font-size: 1.8em; color: #fff">
-        <li> Posting articles (paying only Ethereum Blockchain transaction fee)
-        <li> Tipping authors with comments
-        <li> Your Ether donation will always be yours for various activities on BlockQuotes. 
+      <br>
+       <ul style="width: 75%; margin:auto; font-size: 1.8em; color: #fff">
+        <li> ... for just 3.0 Ethers! 
+        <li> Membership NEVER expires as long as balance is non-zero.
+        <li> Posting articles (paying only Ethereum Blockchain mining fee)
+        <li> Tip to comment (charge against your balance)
+        <li> Your Ether will always be yours for various activities on BlockQuotes.
        </ul>
 
       <form id="member" name="member" role="form" action="/join?form='member'" method="POST">
@@ -26,11 +29,11 @@
         <label for="payment" style="font-size: 1em; color: #fff">&nbsp sends &nbsp</label>
         <input type="text" id="payment" name="payment" size=4 maxlength=72 required value="3.0" />
         <label for="payment" style="font-size: 1em; color: #fff">&nbsp Ether</label>
-        <br><br><br><p align="center"><button type="submit">Send</button></p>
+        <br><br><br><p align="center"><button class="btn btn-mid btn-default" type="submit">Send</button></p>
       </div>
       </form>
       <br><br></p>
-      <h3 align="center" style="font-size: 3em; color: yellow">Join Now!</h3><h4 align="center" style="font-size: 1em; color: #eee"> (Not refundable)</h4>
+      <h3 align="center" style="font-size: 3em; color: yellow">Join Now!</h3><h4 align="center" style="font-size: 1em; color: red"> (Not refundable)</h4>
       <br><br>
       </div>
 

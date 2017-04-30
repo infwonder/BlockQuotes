@@ -1,10 +1,25 @@
-  <div class="jumbotron">
-    <div class="container">
-      <h1 align="center">About this DApp ...</h1>
-    </div>
-  </div>
+  <style>
+     html {
+      background: url('/images/mainback.jpg') no-repeat center center fixed; 
+      -moz-background-size: cover;
+     }
+     
+     body {
+      background: transparent;
+     }
+  </style>
 
-  <div>
-    <h3 align="center">Contract: {{contract_address}} </h3>
-    <h3 align="center">Author: Jason Lin</h3>
-  </div>
+      <div class="jumbotron" style="margin-top: 13.5%; background-color: rgba(0,0,0,0.75);">
+      <br><p>
+      <h1 align="center" style="font-size: 4em; color: #fff">About BlockQuotes ...</h1>
+      <br>
+      <br>
+       <ul style="width: 55%; margin:auto; font-size: 2em; color: #fff">
+        <li> Author: Jason Lin (infwonder@gmail.com)
+        <li> Contract Address: {{contract_address}}
+        <li> This version is for B9Lab Ethereum Developer Certification (final project)
+       </ul>
+      <br>
+      <br>
+      </div>
+
