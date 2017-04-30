@@ -30,3 +30,6 @@ After checking out from GitHub, in the source code root dir, run:
 ## 4. Start BlockQuotes:
 
        npm start
+
+
+#### License: GPL v3
