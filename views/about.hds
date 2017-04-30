@@ -17,7 +17,7 @@
        <ul style="width: 55%; margin:auto; font-size: 2em; color: #fff">
         <li> Author: Jason Lin (infwonder@gmail.com)
         <li> Contract Address: {{contract_address}}
-        <li> This version is for B9Lab Ethereum Developer Certification (final project)
+        <li> For B9Lab Ethereum Developer Certification (final project)
        </ul>
       <br>
       <br>

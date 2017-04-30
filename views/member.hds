@@ -24,11 +24,11 @@
 
       <form id="member" name="member" role="form" action="/join?form='member'" method="POST">
       <div align="center">
-      <br><br><label for="address" style="font-size: 1em; color: #fff">From Address: &nbsp</label>
-        <input type="text" id="address" name="memberAddr" size=52 maxlength=72 style="font-family: monospace" required placeholder="e.g., 0x15bbd608487cd4b08fa482dfc919cd35978fedf0" />
-        <label for="payment" style="font-size: 1em; color: #fff">&nbsp sends &nbsp</label>
-        <input type="text" id="payment" name="payment" size=4 maxlength=72 required value="3.0" />
-        <label for="payment" style="font-size: 1em; color: #fff">&nbsp Ether</label>
+      <br><br><label for="payment" style="font-size: 1.8em; color: #fff">From: &nbsp {{coinbase}} &nbsp</label>
+        <br><label for="payment" style="font-size: 1em; color: #fff">&nbsp (your eth.coinbase) &nbsp</label>
+        <br><label for="payment" style="font-size: 1.8em; color: #fff">&nbsp sends &nbsp</label>
+        <input type="text" id="payment" readonly name="payment" size=4 maxlength=72 required value="3.0" />
+        <label for="payment" style="font-size: 1.8em; color: #fff">&nbsp Ether</label>
         <br><br><br><p align="center"><button class="btn btn-mid btn-default" type="submit">Send</button></p>
       </div>
       </form>

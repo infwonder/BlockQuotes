@@ -48,7 +48,7 @@ ipfs.add(fs.readFileSync(__dirname + '/misc/BlockQuotes_Intro_text.txt'), (err, 
         s.addKeyValue('BlockQuotes: An Introduction', txthash, pichash, 2, {from: web3.eth.accounts[2], gas: 600000}).then((results) => 
         {
           var hash = web3.sha3('BlockQuotes: An Introduction');
-          var comment = "Currenly BlockQuotes only support Firefox ...";
+          var comment = "Currenly BlockQuotes has only been tested with Firefox ...";
           var recipient = web3.eth.accounts[2];
           s.addReply(hash, comment, web3.toWei(0.1, 'ether'), recipient, {from: web3.eth.accounts[2], gas: 600000}).then((result) =>
           {

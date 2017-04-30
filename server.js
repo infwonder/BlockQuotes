@@ -132,6 +132,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
           var hdbobj = {
                 coinbase: web3.eth.coinbase,
              member_type: result[0] ? 'paid (Thank You!)' : 'free',
+                 balance: web3.fromWei(result[1],'ether'),
                   kvlist: array, 
                    start: start, 
                      end: end, 
@@ -153,15 +154,14 @@ StrMapCtr.deployed().then( (StrMapIns) =>
       if (result[0] === true) {
         response.redirect(303, '/kvstore'); 
       } else {
-        response.render('member');
+        response.render('member', {coinbase: web3.eth.coinbase});
       }
     }).catch((err) => { catchedError(response, err); });
   });
 
   app.post('/join', function(request, response) 
   {
-    var member = request.body.memberAddr;
-    var fund   = request.body.payment;
+    var fund = request.body.payment;
 
     StrMapIns.becomeMember({from: web3.eth.coinbase, value: web3.toWei(fund, 'ether')}).then((result) => 
     {
@@ -319,7 +319,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
           response.render('reply', {'hash': hash, 'author': sendto, 'title': title });
         }).catch((err) => { catchedError(response, err) });
       } else {
-        response.render('member');
+        response.render('member', {coinbase: web3.eth.coinbase});
       }
     }).catch((err) => { catchedError(response, err); });
   });
@@ -366,7 +366,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
       if (result[0] === true) {
         response.render('addkv', {key: ''});
       } else {
-        response.render('member');
+        response.render('member', {coinbase: web3.eth.coinbase});
       }
     }).catch((err) => { catchedError(response, err); });
 

@@ -12,7 +12,7 @@
   <script src="/ipfs.min.js"></script>
  
 {{#if ipfslist}} 
-  <div id="picFrame" class="jumbotron" style="background-color: #fff">
+  <div id="picFrame" class="jumbotron" style="display: none">
   <div class="jumboframe-wrapper">
   <div class="jumboframe">
   <table id="imgTBL" class="picture-frame" >
@@ -22,7 +22,7 @@
   </div>
   </div>
 
-  <div id="audFrame" class="container" style="background-color: #fff">
+  <div id="audFrame" class="container" style="display: none">
   <table id="audTBL" class="picture-frame" >
     <tr></tr>
   </table>
@@ -58,6 +58,7 @@
 
       // now handles different types of media based on mimeString
       if (mimeString.match(/^image\/.*/)) {
+        document.getElementById('picFrame').style="display: all; background-color: #fff";
         var ai = document.createElement('a');
         ai.href = URL.createObjectURL(blob);
   
@@ -86,6 +87,7 @@
           }
         };
       } else if (mimeString.match(/^audio\/.*/)) {
+        document.getElementById('audFrame').style="display: all; background-color: #fff";
         console.log("loading ...");
         var audio = document.createElement('AUDIO');
         audio.src = URL.createObjectURL(blob);
@@ -96,6 +98,8 @@
         }
 
         audio.setAttribute("controls", "controls");
+        audio.style = "width: 500px";
+        audio.align ="center";
 
         var tb = document.getElementById("audTBL");
         var row = tb.rows[tb.rows.length-1];

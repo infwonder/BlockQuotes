@@ -14,14 +14,15 @@ Knowing that what I was posting is being constantly monitored by the service pro
 
 So, I need something that I have total control with while making sure that the platform will not be discontinued unexpectedly. Many had said that the Blockchain system such as Ethereum offers glimpses of what "Web 3.0" is about: A world-wide web that's truly permission-less, decentralized, and enables ["exchange of value"](https://www.youtube.com/watch?v=ykWWrAyt25c). 
 
-That's why I created BlockQuotes... Other than the fact that it is also my final project for the B9Lab Ethereum developer class... I have *never* been a web developer before and there are too many things to learn within such short period. As a result, many features that I want has not yet been realized. 
+That's why I created BlockQuotes... Other than the fact that it is also my final project for the B9Lab Ethereum developer class... I have *never* been a web developer before and there are too many things to learn within such short period. As a result, many features that I want has not yet been realized.  
 
-I will continue to add them to this system. Eventually, I want to package it into a container with Docker to enable rapid deployment or upgrade. 
+I plan to continue working on this toy project. Eventually, I want to package it into a container with Docker to enable rapid deployment or upgrade. The idea is that everyone will "dock" in their own BlockQuotes container and using the local nodejs, geth, and ipfs service to connect to the smart contract and exchange data on ipfs. 
 
 # Roadmap
 - Integrating simple purchasing / donation system utilizing Ethereum system. 
-- Adding HTML5 support to audio and video contents stored on IPFS.
+- Adding HTML5 support to audio and video contents stored on IPFS. (audio is already working with mp3)
 - Support full material encryption.
 - Allow local snapshots without committing to Ethereum Blockchain.
+- Custom themes that you can create / sell / purchase ...
 - Light-client support.
 - ...

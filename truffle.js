@@ -1,4 +1,5 @@
 module.exports = {
+  build: "node ./postIntro.js",
   networks: {
   development: {
     host: "localhost",

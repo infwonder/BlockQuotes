@@ -29,8 +29,6 @@
 </table>
 </div>
 
-<hr>
-
 <div class="container" align="center" id="editor">
       <div class="col-md-12" align="left"><label for="thiskey">Title</label>
       <input type="text" id="thiskey" name="keystr" value="{{key}}" size=144 maxlength=128 required placeholder="e.g., my precious new key"></input></div>

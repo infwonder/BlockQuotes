@@ -2,6 +2,7 @@
     <div class="container">
       <h3 align="center">Address: {{coinbase}}</h3>
       <h3 align="center">Membership: {{member_type}}</h3>
+      <h3 align="center">Balance: {{balance}} Ethers</h3>
     <nav aria-label="Page navigation example">
       <ul class="pager">
         {{#if firstpage}}
