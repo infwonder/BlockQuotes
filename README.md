@@ -33,3 +33,4 @@ After checking out from GitHub, in the source code root dir, run:
 
 
 #### License: GPL v3
+##### Background image taken from [blog.ethereum.org](https://blog.ethereum.org/2015/03/14/ethereum-the-first-year/)
