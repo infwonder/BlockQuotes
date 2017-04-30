@@ -27,9 +27,11 @@ After checking out from GitHub, in the source code root dir, run:
 
        truffle migreate --reset && truffle build
 
-## 4. Start BlockQuotes:
+## 4. Start BlockQuotes: (listening on tcp port 8081 since ipfs took port 8080)
 
        npm start
+
+then use browser (only tested with Firefox) to open localhost:8081
 
 
 #### License: GPL v3
