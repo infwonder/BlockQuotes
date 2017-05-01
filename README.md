@@ -8,7 +8,7 @@
 After checking out from GitHub, in the source code root dir, run:
 
       npm install
-      cd bower && bower install
+      cd public && bower install bootstrap@3
 
 ##  1. Need to enable IPFS CORS access: 
 
