@@ -328,7 +328,7 @@ StrMapCtr.deployed().then( (StrMapIns) =>
   {
     var hash = request.params.phash; // need validation!
     var comment = request.body.thisrc;
-    var tips = request.body.ammount;
+    var tips = request.body.amount;
     var recipient = request.body.sendto;
 
     StrMapIns.addReply(hash, comment, web3.toWei(tips, 'ether'), recipient, {from: web3.eth.coinbase, gas: 600000}).then((result) => 
