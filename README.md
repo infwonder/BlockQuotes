@@ -1,4 +1,4 @@
-# BlockQuotes: A Decentralized Blog platform
+# BlockQuotes: A Decentralized Blog Platform
 
 ## 0. Requirements: 
  - nodejs 6.x,
